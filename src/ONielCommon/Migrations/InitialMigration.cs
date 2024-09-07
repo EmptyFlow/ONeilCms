@@ -7,7 +7,7 @@ namespace ONielCommon.Migrations {
 
         public static int MigrationNumber => 1;
 
-        public static string Issue => "https://github.com/EmptyFlow/PostgreSQL.Migrations/issues/1";
+        public static string Issue => "https://github.com/EmptyFlow/ONeilCms/issues/1";
 
         public string Down () {
             return """
