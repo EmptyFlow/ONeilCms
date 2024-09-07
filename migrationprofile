@@ -1,0 +1,3 @@
+constring Host=localhost;Port=5432;Username=postgres;Password=postgres;Database=onielcms
+file src/ONielCms/bin/Debug/net8.0/ONielCommon.dll
+strategy CSharpClasses
