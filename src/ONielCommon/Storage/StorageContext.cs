@@ -402,6 +402,15 @@ namespace ONielCommon.Storage {
             await CommitTransation ( groupedTransaction: true );
         }
 
+        public async Task Delete<T> ( Query query ) {
+            GetTableName<T> ( out string tableName );
+            var queryResult = query.From ( tableName ).AsDelete();
+
+            var compiledQuery = m_compilerWithoutBraces.Compile ( queryResult );
+
+            await ExecuteNonResult (compiledQuery.Sql, compiledQuery.NamedBindings );
+        }
+
     }
 
 }

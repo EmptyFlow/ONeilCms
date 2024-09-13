@@ -26,6 +26,12 @@ namespace ONielCommon.Storage {
         public Task AddOrUpdate<T> ( T item );
 
         /// <summary>
+        /// Delete items.
+        /// </summary>
+        /// <param name="query">Filter for delete.</param>
+        public Task Delete<T> ( Query query );
+
+        /// <summary>
         /// Add or update items declared in generic type.
         /// </summary>
         /// <param name="item">Item collection for saving process.</param>

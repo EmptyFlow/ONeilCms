@@ -11,6 +11,9 @@ namespace ONielCommon.Migrations {
 
         public string Down () {
             return """
+DROP TABLE routeresource;
+DROP TABLE routebinaryresource;
+
 DROP TABLE resourceversion;
 DROP TABLE resourcecontent;
 DROP TABLE resource;
@@ -35,9 +38,22 @@ CREATE TABLE edition(
 CREATE TABLE route(
     id uuid DEFAULT uuid_generate_v4(),
     path text NOT NULL,
-    edition text NOT NULL,
-    CONSTRAINT pk_route_id PRIMARY KEY (id),
-    CONSTRAINT fk_route_edition FOREIGN KEY (edition) REFERENCES edition(name)
+    contentType text NOT NULL,
+    CONSTRAINT pk_route_id PRIMARY KEY (id)
+);
+CREATE TABLE routeresource(
+    routeid uuid NOT NULL,
+    resourceid uuid NOT NULL,
+    renderorder int,
+    CONSTRAINT fk_routeresource_route FOREIGN KEY (routeid) REFERENCES route(id),
+    CONSTRAINT fk_routeresource_resource FOREIGN KEY (resourceid) REFERENCES resource(id)
+);
+CREATE TABLE routebinaryresource(
+    routeid uuid NOT NULL,
+    binaryresourceid uuid NOT NULL,
+    renderorder int,
+    CONSTRAINT fk_routeresource_route FOREIGN KEY (routeid) REFERENCES route(id),
+    CONSTRAINT fk_routeresource_resource FOREIGN KEY (binaryresourceid) REFERENCES binaryresource(id)
 );
 
 CREATE TABLE resource(
