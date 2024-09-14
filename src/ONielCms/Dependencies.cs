@@ -13,6 +13,7 @@ namespace ONielCms {
             collection.AddSingleton<IConfigurationService, ConfigurationService> ();
             collection.AddScoped<IStorageContext, StorageContext> ();
             collection.AddScoped<IRouteService, RouteService> ();
+            collection.AddScoped<IRouteResponseService, RouteResponseService> ();
         }
 
     }

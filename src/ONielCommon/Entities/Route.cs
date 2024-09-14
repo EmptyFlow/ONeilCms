@@ -9,7 +9,7 @@
 
         public string Path { get; init; } = "";
 
-        public string Edition { get; init; } = "";
+        public string ContentType { get; init; } = "";
 
     }
 
