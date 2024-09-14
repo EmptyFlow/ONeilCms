@@ -1,5 +1,6 @@
 ﻿using ONielCms.Services;
 using ONielCommon.Storage;
+using ONielCommon.Storage.EntityServices;
 
 namespace ONielCms {
 
@@ -11,6 +12,7 @@ namespace ONielCms {
         public static void Resolve ( IServiceCollection collection ) {
             collection.AddSingleton<IConfigurationService, ConfigurationService> ();
             collection.AddScoped<IStorageContext, StorageContext> ();
+            collection.AddScoped<IRouteService, RouteService> ();
         }
 
     }
