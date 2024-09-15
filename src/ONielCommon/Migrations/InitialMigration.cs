@@ -55,9 +55,11 @@ CREATE TABLE resourcecontent(
 CREATE TABLE resourceversion(
     id uuid DEFAULT uuid_generate_v4(),
     edition text NOT NULL,
+    resourceid uuid NOT NULL,
     resourcecontentid uuid NOT NULL,
     CONSTRAINT pk_resourceversion_id PRIMARY KEY (id),
-    CONSTRAINT fk_resourceversion_resourcecontent FOREIGN KEY (resourcecontentid) REFERENCES resourcecontent(id)
+    CONSTRAINT fk_resourceversion_resourcecontent FOREIGN KEY (resourcecontentid) REFERENCES resourcecontent(id),
+    CONSTRAINT fk_resourceversion_resource FOREIGN KEY (resourceid) REFERENCES resource(id)
 );
 
 CREATE TABLE binaryresource(
@@ -73,9 +75,11 @@ CREATE TABLE binaryresourcecontent(
 CREATE TABLE binaryresourceversion(
     id uuid DEFAULT uuid_generate_v4(),
     edition text NOT NULL,
+    binaryresourceid uuid NOT NULL,
     binaryresourcecontentid uuid NOT NULL,
     CONSTRAINT pk_binaryresourceversion_id PRIMARY KEY (id),
-    CONSTRAINT fk_binaryresourceversion_binaryresourcecontent FOREIGN KEY (binaryresourcecontentid) REFERENCES binaryresourcecontent(id)
+    CONSTRAINT fk_binaryresourceversion_binaryresourcecontent FOREIGN KEY (binaryresourcecontentid) REFERENCES binaryresourcecontent(id),
+    CONSTRAINT fk_binaryresourceversion_binaryresource FOREIGN KEY (binaryresourceid) REFERENCES binaryresource(id)
 );
 
 CREATE TABLE routeresource(
