@@ -49,7 +49,7 @@ CREATE TABLE resource(
 );
 CREATE TABLE resourcecontent(
     id uuid DEFAULT uuid_generate_v4(),
-    content text NOT NULL,
+    content bytea NOT NULL,
     CONSTRAINT pk_resourcecontent_id PRIMARY KEY (id)
 );
 CREATE TABLE resourceversion(
@@ -62,39 +62,12 @@ CREATE TABLE resourceversion(
     CONSTRAINT fk_resourceversion_resource FOREIGN KEY (resourceid) REFERENCES resource(id)
 );
 
-CREATE TABLE binaryresource(
-    id uuid DEFAULT uuid_generate_v4(),
-    identifier text NOT NULL UNIQUE,
-    CONSTRAINT pk_binaryresource_id PRIMARY KEY (id)
-);
-CREATE TABLE binaryresourcecontent(
-    id uuid DEFAULT uuid_generate_v4(),
-    content bytea NOT NULL,
-    CONSTRAINT pk_binaryresourcecontent_id PRIMARY KEY (id)
-);
-CREATE TABLE binaryresourceversion(
-    id uuid DEFAULT uuid_generate_v4(),
-    edition text NOT NULL,
-    binaryresourceid uuid NOT NULL,
-    binaryresourcecontentid uuid NOT NULL,
-    CONSTRAINT pk_binaryresourceversion_id PRIMARY KEY (id),
-    CONSTRAINT fk_binaryresourceversion_binaryresourcecontent FOREIGN KEY (binaryresourcecontentid) REFERENCES binaryresourcecontent(id),
-    CONSTRAINT fk_binaryresourceversion_binaryresource FOREIGN KEY (binaryresourceid) REFERENCES binaryresource(id)
-);
-
 CREATE TABLE routeresource(
     routeid uuid NOT NULL,
     resourceid uuid NOT NULL,
     renderorder int,
     CONSTRAINT fk_routeresource_route FOREIGN KEY (routeid) REFERENCES route(id),
     CONSTRAINT fk_routeresource_resource FOREIGN KEY (resourceid) REFERENCES resource(id)
-);
-CREATE TABLE routebinaryresource(
-    routeid uuid NOT NULL,
-    binaryresourceid uuid NOT NULL,
-    renderorder int,
-    CONSTRAINT fk_routeresource_route FOREIGN KEY (routeid) REFERENCES route(id),
-    CONSTRAINT fk_routeresource_resource FOREIGN KEY (binaryresourceid) REFERENCES binaryresource(id)
 );
 """;
 
