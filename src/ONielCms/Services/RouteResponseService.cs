@@ -15,18 +15,6 @@ namespace ONielCms.Services {
             var fallbackVersion = "";
             var editions = new List<string> { currentVersion, fallbackVersion };
 
-            /*
-             SELECT
-	resourceversion.resourcecontentid,
-	resourceversion.edition
-FROM
-	resourceversion
-	INNER JOIN routeresource ON routeresource.resourceid = routeresource.resourceid 
-WHERE resourceversion.edition IN ('1', '2')	
-ORDER BY
-	routeresource.renderorder
-             */
-
             var contentVersions = ( await m_storageContext
                 .GetAsync<ContentVersion> (
                     new Query ( "resourceversion" )

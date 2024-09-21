@@ -12,15 +12,10 @@ namespace ONielCommon.Migrations {
         public string Down () {
             return """
 DROP TABLE routeresource;
-DROP TABLE routebinaryresource;
 
 DROP TABLE resourceversion;
 DROP TABLE resourcecontent;
 DROP TABLE resource;
-
-DROP TABLE binaryresourceversion;
-DROP TABLE binaryresourcecontent;
-DROP TABLE binaryresource;
 
 DROP TABLE route;
 DROP TABLE edition;
