@@ -34,6 +34,7 @@ CREATE TABLE route(
     id uuid DEFAULT uuid_generate_v4(),
     path text NOT NULL,
     contentType text NOT NULL,
+    method text NOT NULL,
     CONSTRAINT pk_route_id PRIMARY KEY (id)
 );
 
