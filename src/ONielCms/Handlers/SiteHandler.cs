@@ -33,14 +33,32 @@ namespace ONielCms.Handlers {
             return null;
         }
 
-        public static async Task LoadRoutes (IRouteService routeService ) {
-            var routes = await routeService.GetRoutes (a => new Query().Where("method", "GET"));
+        public static async Task LoadRoutes ( IRouteService routeService ) {
+            var routes = await routeService.GetRoutes ( a => new Query ().Where ( "method", "GET" ) );
+            m_getPreciousRoutes = routes
+                .Where (
+                    a =>
+                        !a.Path.Contains ( "{" ) && !a.Path.Contains ( "}" ) // dynamic segment of path look like {XXX}
+                )
+                .ToDictionary ( a => a.Path, a => a.Id );
+            m_getDynamicRoutes = routes
+                .Where (
+                    a =>
+                        a.Path.Contains ( "{" ) && a.Path.Contains ( "}" ) // dynamic segment of path look like {XXX}
+                )
+                .ToDictionary ( a => GetRegExForDynamicPath ( a.Path ), a => (a.Path, a.Id) );
 
-            var refreshRoutes = new Dictionary<string, Guid> ();
+        }
 
-            refreshRoutes = routes.ToDictionary ( a => a.Path, a => a.Id );
+        private static Regex GetRegExForDynamicPath ( string path ) {
+            var result = path;
+            foreach ( Match match in Regex.Matches ( path, @"\{[A-Za-z0-1]{0,}\}" ) ) {
+                var segment = match.Value;
 
-            m_getPreciousRoutes = refreshRoutes;
+                result = result.Replace ( segment, @"\{[A-Za-z0-1]{0,}\}" );
+            }
+
+            return new Regex ( result.Replace ( "/", @"\/" ) );
         }
 
     }
