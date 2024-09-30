@@ -4,7 +4,7 @@
 
         public Guid Id { get; init; }
 
-        public string Content { get; set; } = "";
+        public byte[] Content { get; set; } = [];
 
     }
 

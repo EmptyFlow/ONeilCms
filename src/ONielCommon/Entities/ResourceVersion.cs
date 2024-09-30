@@ -6,6 +6,8 @@
 
         public string Edition { get; set; } = "";
 
+        public Guid ResourceId { get; set; }
+
         public Guid ResourceContentId { get; set; }
 
     }
