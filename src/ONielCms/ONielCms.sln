@@ -5,7 +5,9 @@ VisualStudioVersion = 17.10.35027.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ONielCms", "ONielCms.csproj", "{6AE32594-37DB-4BAF-A470-D1FE4F032F2F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ONielCommon", "..\ONielCommon\ONielCommon.csproj", "{64D1F698-E117-4251-AFC7-2D621734066C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ONielCommon", "..\ONielCommon\ONielCommon.csproj", "{64D1F698-E117-4251-AFC7-2D621734066C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ONeilCms.Tests", "..\ONeilCms.Tests\ONeilCms.Tests.csproj", "{FA79855A-CDDF-4EC2-A24C-711ACF00566E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{64D1F698-E117-4251-AFC7-2D621734066C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{64D1F698-E117-4251-AFC7-2D621734066C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{64D1F698-E117-4251-AFC7-2D621734066C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA79855A-CDDF-4EC2-A24C-711ACF00566E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA79855A-CDDF-4EC2-A24C-711ACF00566E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA79855A-CDDF-4EC2-A24C-711ACF00566E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA79855A-CDDF-4EC2-A24C-711ACF00566E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
