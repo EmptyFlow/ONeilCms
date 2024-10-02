@@ -59,6 +59,25 @@ namespace ONielCms.Services {
             );
         }
 
+        public Task EditResourceVersion ( string identifier, string edition, byte[] content ) {
+            return m_storageContext.MakeInTransaction (
+                async () => {
+                    var resourceContent =  await m_storageContext.GetSingleAsync<ResourceContent?> (
+                        new Query ()
+                            .Join ( "resourceversion", "resourceversion.resourcecontentid", "resourcecontent.id" )
+                            .Join ( "resource", "resourceversion.resourceid", "resource.id" )
+                            .Where ( "resource.identifier", identifier )
+                            .Where ( "resourceversion.edition", edition )
+                            .Select ( "resourcecontent.*" )
+                            .Limit ( 1 )
+                    )  ?? throw new Exception ( "Not found resource content" );
+
+                    resourceContent.Content = content;
+                    await m_storageContext.AddOrUpdate ( resourceContent );
+                }
+            );
+        }
+
     }
 
 }
