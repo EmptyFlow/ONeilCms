@@ -365,10 +365,13 @@ namespace ONielCommon.Storage {
         public async Task<IEnumerable<T>> GetAsync<T> ( Query query ) where T : new() {
             if ( query == null ) throw new ArgumentNullException ( nameof ( query ) );
 
-            GetTableName<T> ( out string? tableName );
-            var queryResult = query.From ( tableName );
+            // if table not specified, we try get table from class model attributes or it name itself
+            if ( !query.HasComponent ( "from" ) ) {
+                GetTableName<T> ( out string? tableName );
+                query = query.From ( tableName );
+            }
 
-            var compiledQuery = m_compilerWithoutBraces.Compile ( queryResult );
+            var compiledQuery = m_compilerWithoutBraces.Compile ( query );
             return await ExecuteWithResultAsCollectionAsync<T> ( compiledQuery.Sql, compiledQuery.NamedBindings );
         }
 
@@ -404,11 +407,11 @@ namespace ONielCommon.Storage {
 
         public async Task Delete<T> ( Query query ) {
             GetTableName<T> ( out string tableName );
-            var queryResult = query.From ( tableName ).AsDelete();
+            var queryResult = query.From ( tableName ).AsDelete ();
 
             var compiledQuery = m_compilerWithoutBraces.Compile ( queryResult );
 
-            await ExecuteNonResult (compiledQuery.Sql, compiledQuery.NamedBindings );
+            await ExecuteNonResult ( compiledQuery.Sql, compiledQuery.NamedBindings );
         }
 
     }

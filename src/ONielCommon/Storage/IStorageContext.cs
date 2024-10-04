@@ -14,6 +14,12 @@ namespace ONielCommon.Storage {
 
     }
 
+    public static class Kata {
+
+        public static Query Set => new Query ();
+
+    }
+
     /// <summary>
     /// Storage context.
     /// </summary>

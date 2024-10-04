@@ -5,11 +5,11 @@ using ONielCms.Services;
 
 ConfigurationService.Initialize ();
 
-var builder = WebApplication.CreateSlimBuilder ( args );
-
-var app = builder.Build ();
+var builder = WebApplication.CreateBuilder ( args );
 
 Dependencies.Resolve ( builder.Services );
+
+var app = builder.Build ();
 
 //app.Urls.Add("http://localhost:4000");
 
