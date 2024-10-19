@@ -1,5 +1,5 @@
 using FakeItEasy;
-using ONielCms.Services;
+using ONielCms.Services.DatabaseLogic;
 using ONielCommon.Entities;
 using ONielCommon.Storage;
 using SqlKata;

@@ -2,9 +2,9 @@
 using ONielCommon.Storage;
 using SqlKata;
 
-namespace ONielCms.Services {
+namespace ONielCms.Services.DatabaseLogic {
 
-    public class ResourceManagementService {
+    public class ResourceManagementService : IResourceManagementService {
 
         private readonly IStorageContext m_storageContext;
 
@@ -62,7 +62,7 @@ namespace ONielCms.Services {
         public Task EditResourceVersion ( string identifier, string edition, byte[] content ) {
             return m_storageContext.MakeInTransaction (
                 async () => {
-                    var resourceContent =  await m_storageContext.GetSingleAsync<ResourceContent?> (
+                    var resourceContent = await m_storageContext.GetSingleAsync<ResourceContent?> (
                         new Query ()
                             .Join ( "resourceversion", "resourceversion.resourcecontentid", "resourcecontent.id" )
                             .Join ( "resource", "resourceversion.resourceid", "resource.id" )
@@ -70,7 +70,7 @@ namespace ONielCms.Services {
                             .Where ( "resourceversion.edition", edition )
                             .Select ( "resourcecontent.*" )
                             .Limit ( 1 )
-                    )  ?? throw new Exception ( "Not found resource content" );
+                    ) ?? throw new Exception ( "Not found resource content" );
 
                     resourceContent.Content = content;
                     await m_storageContext.AddOrUpdate ( resourceContent );
