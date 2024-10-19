@@ -11,6 +11,8 @@
 
         public string ContentType { get; init; } = "";
 
+        public string Method { get; init; } = "";
+
     }
 
 }

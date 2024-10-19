@@ -79,6 +79,12 @@ namespace ONielCommon.Storage {
         /// <param name="action">Action for transaction.</param>
         public Task MakeInTransaction ( Func<Task> action );
 
+        /// <summary>
+        /// Make queries containing in `action` in single transaction.
+        /// </summary>
+        /// <param name="action">Action for transaction.</param>
+        public Task<T> MakeInTransaction<T> ( Func<Task<T>> action );
+
     }
 
 }

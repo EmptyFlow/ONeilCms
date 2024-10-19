@@ -405,6 +405,16 @@ namespace ONielCommon.Storage {
             await CommitTransation ( groupedTransaction: true );
         }
 
+        public async Task<T> MakeInTransaction<T> ( Func<Task<T>> action ) {
+            await BeginTransaction ( groupedTransaction: true );
+
+            var result = await action ();
+
+            await CommitTransation ( groupedTransaction: true );
+
+            return result;
+        }
+
         public async Task Delete<T> ( Query query ) {
             GetTableName<T> ( out string tableName );
             var queryResult = query.From ( tableName ).AsDelete ();
