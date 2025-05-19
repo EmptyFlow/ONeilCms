@@ -18,9 +18,9 @@ namespace ONielCms.Services.DatabaseLogic {
             return m_storageContext.MakeInTransaction (
                 async () => {
                     var content = await File.ReadAllTextAsync ( fileName );
-                    ImportVersionModel model;
+                    ImportVersionModel? model;
                     try {
-                        model = JsonSerializer.Deserialize<ImportVersionModel> ( content );
+                        model = JsonSerializer.Deserialize ( content, OnielCmsJsonContext.Default.ImportVersionModel );
                     } catch ( Exception ex ) {
                         throw new Exception ( $"Can't deserialize file at path {fileName}: {ex.Message}" );
                     }

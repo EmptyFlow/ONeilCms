@@ -16,7 +16,6 @@ namespace ONielCms {
             collection.AddScoped<IStorageContext, StorageContext> ();
             collection.AddScoped<IRouteService, RouteService> ();
             collection.AddScoped<IRouteResponseService, RouteResponseService> ();
-            collection.AddScoped<IResourceManagementService, ResourceManagementService> ();
         }
 
     }
