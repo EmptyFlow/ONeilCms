@@ -1,3 +1,8 @@
 constring Host=localhost;Port=5432;Username=postgres;Password=postgres;Database=onielcms
 file src/ONielCms/bin/Debug/net8.0/ONielCommon.dll
-strategy CSharpClasses
+strategy PlainSql
+genparameter upfilename=upscript.sql
+genparameter downfilename=downscript.sql
+genparameter metafilename=meta
+genparameter migrationfolder=Migration-{MigrationNumber}
+genparameter containingFolder=src/ONielCommon/Migrations

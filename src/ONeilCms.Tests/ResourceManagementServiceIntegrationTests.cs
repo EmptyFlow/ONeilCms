@@ -9,7 +9,7 @@ namespace ONeilCms.Tests {
 
     public class ResourceManagementServiceIntegrationTests {
 
-        private string TestingConnectionString = "Username=postgres;Password=postgres;Host=localhost;Port=5432;Database=onielcms";
+        private string TestingConnectionString = "Username=postgres;Password=postgres;Host=localhost;Port=5432;Database=onielcms;Connection Lifetime=0";
 
         [Fact, Trait ( "Category", "Integration" )]
         public async Task CreateResource_Completed_Case1 () {

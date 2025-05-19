@@ -9,6 +9,8 @@ namespace ONielCommon.Entities {
 
         public string Identifier { get; init; } = "";
 
+        public byte[] Content { get; set; } = [];
+
     }
 
 }

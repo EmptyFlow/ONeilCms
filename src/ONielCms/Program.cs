@@ -38,5 +38,11 @@ routeBuilder.MapDelete (
         return Results.Ok ();
     }
 );
+routeBuilder.MapPatch (
+    "/{*path}",
+    ( [FromRoute] string path, HttpContext context ) => {
+        return Results.Ok ();
+    }
+);
 
 app.Run ();

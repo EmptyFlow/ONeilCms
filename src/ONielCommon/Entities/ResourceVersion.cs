@@ -7,11 +7,9 @@ namespace ONielCommon.Entities {
 
         public Guid Id { get; init; }
 
-        public string Edition { get; set; } = "";
+        public string Version { get; set; } = "";
 
         public Guid ResourceId { get; set; }
-
-        public Guid ResourceContentId { get; set; }
 
     }
 

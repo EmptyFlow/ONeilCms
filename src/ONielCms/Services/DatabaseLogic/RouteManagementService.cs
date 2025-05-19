@@ -1,5 +1,4 @@
-﻿using ONielCommon.Entities;
-using ONielCommon.Storage;
+﻿using ONielCommon.Storage;
 using SqlKata;
 using Route = ONielCommon.Entities.Route;
 
@@ -16,7 +15,7 @@ namespace ONielCms.Services.DatabaseLogic {
             RouteMethod.POST => "GET",
             RouteMethod.PUT => "PUT",
             RouteMethod.DELETE => "DELETE",
-            RouteMethod.PATCH => "PATCH",
+            RouteMethod.PATCH => "PATCH", 
             _ => ""
         };
 
