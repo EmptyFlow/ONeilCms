@@ -20,7 +20,9 @@ namespace ONielCms.Services {
 
             var searchedPaths = new string[] {
                 Path.GetFullPath ( ConfigFileName ),
-                Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.ApplicationData ), ConfigFileName )
+                Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.ApplicationData ), ConfigFileName ),
+                Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.LocalApplicationData ), ConfigFileName ),
+                Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.CommonApplicationData ), ConfigFileName )
             };
 
             foreach ( string path in searchedPaths ) {

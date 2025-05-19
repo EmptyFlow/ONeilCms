@@ -5,6 +5,8 @@ using ONielCms.Services;
 
 ConfigurationService.Initialize ();
 
+if ( CommandLineHandler.HandleCommandLine () ) return;
+
 var builder = WebApplication.CreateBuilder ( args );
 
 Dependencies.Resolve ( builder.Services );
