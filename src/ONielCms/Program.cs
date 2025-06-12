@@ -2,10 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using ONielCms;
 using ONielCms.Handlers;
 using ONielCms.Services;
+using ONielCommon.Storage;
 
 ConfigurationService.Initialize ();
 
-if ( CommandLineHandler.HandleCommandLine () ) return;
+if ( CommandLineHandler.HandleCommandLine ( new StorageContext ( new ConsoleStorageLogger (), new ConfigurationService () ) ) ) return;
 
 var builder = WebApplication.CreateBuilder ( args );
 

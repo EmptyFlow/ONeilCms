@@ -2,6 +2,7 @@
 using ONielCommon.Entities;
 using ONielCommon.Storage;
 using SqlKata;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using RouteEntity = ONielCommon.Entities.Route;
@@ -13,6 +14,12 @@ namespace ONielCms.Services.DatabaseLogic {
         private readonly IStorageContext m_storageContext;
 
         public ImportVersionService ( IStorageContext storageContext ) => m_storageContext = storageContext;
+
+        private string CalculateHash ( string rawContent ) {
+            using var sha256 = SHA256.Create ();
+            var hashBytes = sha256.ComputeHash ( Encoding.UTF8.GetBytes ( rawContent ) );
+            return BitConverter.ToString ( hashBytes ).ToLowerInvariant ();
+        }
 
         public Task ImportFromFile ( string fileName ) {
             return m_storageContext.MakeInTransaction (
@@ -30,21 +37,31 @@ namespace ONielCms.Services.DatabaseLogic {
 
                     ValidateModel ( model, existsVersions.Select ( a => a.Version ) );
 
-                    var resourceIds = new Dictionary<string, Resource> ();
+                    var resourcesHashes = ( await m_storageContext.GetAsync<ResourceWithoutContent> ( new Query ().Select ( ["id", "identifier", "contenthash"] ) ) )
+                        .ToDictionary ( a => a.Identifier );
+
+                    var resourceIds = new Dictionary<string, Guid> ();
                     foreach ( var resource in model.Resources ) {
                         byte[] bytes = [];
+                        string hash = "";
                         if ( resource.RawContent != null ) {
                             bytes = Encoding.UTF8.GetBytes ( resource.RawContent );
+                            hash = CalculateHash ( resource.RawContent );
                         }
                         if ( bytes.Length == 0 ) continue;
 
-                        var resourceModel = new Resource {
-                            Identifier = resource.Id,
-                            Content = bytes
-                        };
-                        resourceIds.Add ( resource.Id, resourceModel );
+                        if ( resourcesHashes.TryGetValue ( resource.Id, out var currentHash ) && hash == currentHash.ContentHash ) {
+                            resourceIds.Add ( resource.Id, currentHash.Id );
+                        } else {
+                            var resourceModel = new Resource {
+                                Identifier = resource.Id,
+                                Content = bytes,
+                                ContentHash = hash
+                            };
+                            await m_storageContext.AddOrUpdate ( resourceModel );
 
-                        await m_storageContext.AddOrUpdate ( resourceModel );
+                            resourceIds.Add ( resource.Id, resourceModel.Id );
+                        }
                     }
 
                     foreach ( var route in model.Routes ) {
@@ -58,7 +75,7 @@ namespace ONielCms.Services.DatabaseLogic {
                             .Select (
                                 ( a, index ) => new RouteResource {
                                     RenderOrder = index,
-                                    ResourceId = resourceIds[a].Id,
+                                    ResourceId = resourceIds[a],
                                     RouteId = routeModel.Id,
                                 }
                             )

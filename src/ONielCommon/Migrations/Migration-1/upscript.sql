@@ -25,6 +25,7 @@ CREATE TABLE resource(
     id uuid DEFAULT uuid_generate_v4(),
     identifier text NOT NULL,
     content bytea NOT NULL,
+    contenthash text NOT NULL,
     CONSTRAINT pk_textresource_id PRIMARY KEY (id)
 );
 
