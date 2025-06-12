@@ -1,0 +1,19 @@
+{
+	"data": {
+		"version": "1.0.0"
+	},
+	"routes": [
+		{
+			"path": "/",
+			"contentType": "text/html",
+			"method": "GET",
+			"resources":["","",""]
+		}		
+	],
+	"resources": [
+		{
+			"id": "root",
+			"rawContent": ""
+		}
+	]
+}

@@ -5,12 +5,14 @@ using ONielCms.Services;
 using ONielCommon.Storage;
 
 ConfigurationService.Initialize ();
+var storageService = new StorageContext ( new ConsoleStorageLogger (), new ConfigurationService () );
 
-if ( CommandLineHandler.HandleCommandLine ( new StorageContext ( new ConsoleStorageLogger (), new ConfigurationService () ) ) ) return;
+if ( await CommandLineHandler.HandleCommandLine ( storageService ) ) return;
 
-var builder = WebApplication.CreateBuilder ( args );
+var builder = WebApplication.CreateBuilder ( Enumerable.Empty<string> ().ToArray () );
 
 Dependencies.Resolve ( builder.Services );
+
 
 var app = builder.Build ();
 

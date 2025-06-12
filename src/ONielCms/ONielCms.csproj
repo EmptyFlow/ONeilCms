@@ -23,14 +23,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="..\..\..\..\LocalCacheChecker\LocalCacheChecker\README.md">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-		</None>
+	  <None Include="..\..\..\..\SciterAPI\SciterAPI\README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="FlowCommandLine" Version="1.0.8" />
+		<PackageReference Include="FlowCommandLine" Version="1.0.9" />
 	</ItemGroup>
 
 	<ItemGroup>

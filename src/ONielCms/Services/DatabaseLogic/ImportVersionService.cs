@@ -24,7 +24,16 @@ namespace ONielCms.Services.DatabaseLogic {
         public Task ImportFromFile ( string fileName ) {
             return m_storageContext.MakeInTransaction (
                 async () => {
+                    if ( !File.Exists ( fileName ) ) {
+                        Console.WriteLine ( $"File by path: {fileName} not found!" );
+                        return;
+                    }
+
                     var content = await File.ReadAllTextAsync ( fileName );
+                    if ( content == null ) {
+                        Console.WriteLine ( $"Can;t read content from file {fileName}!" );
+                        return;
+                    }
                     ImportVersionModel? model;
                     try {
                         model = JsonSerializer.Deserialize ( content, OnielCmsJsonContext.Default.ImportVersionModel );
