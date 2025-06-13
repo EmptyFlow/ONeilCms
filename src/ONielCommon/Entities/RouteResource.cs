@@ -1,8 +1,11 @@
-﻿namespace ONielCommon.Entities {
+﻿using ONielCommon.Storage;
+
+namespace ONielCommon.Entities {
 
     /// <summary>
     /// Glue for combine route and resources.
     /// </summary>
+    [TableName ( "routeresource" )]
     public record RouteResource {
 
         public Guid Id { get; init; }

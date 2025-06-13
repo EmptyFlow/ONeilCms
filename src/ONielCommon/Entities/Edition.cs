@@ -1,5 +1,8 @@
-﻿namespace ONielCommon.Entities {
+﻿using ONielCommon.Storage;
 
+namespace ONielCommon.Entities {
+
+    [TableName("edition")]
     public class Edition {
 
         public Guid Id { get; init; }

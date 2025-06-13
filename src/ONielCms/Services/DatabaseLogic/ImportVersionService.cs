@@ -18,7 +18,7 @@ namespace ONielCms.Services.DatabaseLogic {
         private string CalculateHash ( string rawContent ) {
             using var sha256 = SHA256.Create ();
             var hashBytes = sha256.ComputeHash ( Encoding.UTF8.GetBytes ( rawContent ) );
-            return BitConverter.ToString ( hashBytes ).ToLowerInvariant ();
+            return BitConverter.ToString ( hashBytes ).Replace ( "-", "" ).ToLowerInvariant ();
         }
 
         public Task ImportFromFile ( string fileName ) {
@@ -60,14 +60,30 @@ namespace ONielCms.Services.DatabaseLogic {
                         if ( bytes.Length == 0 ) continue;
 
                         if ( resourcesHashes.TryGetValue ( resource.Id, out var currentHash ) && hash == currentHash.ContentHash ) {
+                            // if resource already exists just need to add link on version
                             resourceIds.Add ( resource.Id, currentHash.Id );
+
+                            var resourceVersion = new ResourceVersion {
+                                ResourceId = currentHash.Id,
+                                Version = model.Data.Version
+                            };
+                            await m_storageContext.AddOrUpdate ( resourceVersion );
+
                         } else {
+                            // if resource not exists need to create it
                             var resourceModel = new Resource {
                                 Identifier = resource.Id,
                                 Content = bytes,
                                 ContentHash = hash
                             };
                             await m_storageContext.AddOrUpdate ( resourceModel );
+
+                            // and link with version
+                            var resourceVersion = new ResourceVersion {
+                                ResourceId = resourceModel.Id,
+                                Version = model.Data.Version
+                            };
+                            await m_storageContext.AddOrUpdate ( resourceVersion );
 
                             resourceIds.Add ( resource.Id, resourceModel.Id );
                         }
@@ -112,7 +128,7 @@ namespace ONielCms.Services.DatabaseLogic {
                 var notExists = route.Resources
                     .Where ( a => !resourceIds.Contains ( a ) )
                     .ToList ();
-                throw new Exception ( $"Model.Routes.Resources ({route}) have not exists resources - {string.Join ( ", ", notExists )}" );
+                if ( notExists.Any () ) throw new Exception ( $"Model.Routes.Resources ({route}) have not exists resources - {string.Join ( ", ", notExists )}" );
             }
         }
 

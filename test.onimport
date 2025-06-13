@@ -7,13 +7,13 @@
 			"path": "/",
 			"contentType": "text/html",
 			"method": "GET",
-			"resources":["","",""]
+			"resources":["root"]
 		}		
 	],
 	"resources": [
 		{
 			"id": "root",
-			"rawContent": ""
+			"rawContent": "<html><body><span>Hello World!!!</span></body></html>"
 		}
 	]
 }

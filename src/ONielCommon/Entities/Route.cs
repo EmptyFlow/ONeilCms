@@ -1,8 +1,11 @@
-﻿namespace ONielCommon.Entities {
+﻿using ONielCommon.Storage;
+
+namespace ONielCommon.Entities {
 
     /// <summary>
     /// Website route.
     /// </summary>
+    [TableName("route")]
     public record Route {
 
         public Guid Id { get; init; }
