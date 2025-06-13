@@ -42,9 +42,7 @@ namespace ONielCms.Services.DatabaseLogic {
                     }
                     if ( model == null ) throw new Exception ( $"Can't deserialize file at path {fileName}!" );
 
-                    var existsVersions = await m_storageContext.GetAsync<Edition> ( new Query () );
-
-                    ValidateModel ( model, existsVersions.Select ( a => a.Version ) );
+                    ValidateModel ( model );
 
                     var resourcesHashes = ( await m_storageContext.GetAsync<ResourceWithoutContent> ( new Query ().Select ( ["id", "identifier", "contenthash"] ) ) )
                         .ToDictionary ( a => a.Identifier );
@@ -89,29 +87,48 @@ namespace ONielCms.Services.DatabaseLogic {
                         }
                     }
 
+                    var existsRoutes = await m_storageContext.GetAsync<RouteEntity> ( new Query () );
+
                     foreach ( var route in model.Routes ) {
-                        var routeModel = new RouteEntity {
-                            ContentType = route.ContentType,
-                            Method = route.Method,
-                            Path = route.Path,
-                        };
-                        await m_storageContext.AddOrUpdate ( routeModel );
-                        var routeResources = route.Resources
-                            .Select (
-                                ( a, index ) => new RouteResource {
-                                    RenderOrder = index,
-                                    ResourceId = resourceIds[a],
-                                    RouteId = routeModel.Id,
-                                }
-                            )
-                            .ToList ();
-                        foreach ( var routeResource in routeResources ) await m_storageContext.AddOrUpdate ( routeResource );
+                        var existRoute = existsRoutes
+                            .FirstOrDefault ( a => a.Path == route.Path && a.Method == route.Method );
+                        if ( existRoute != null ) {
+                            var routeVersion = new RouteVersion {
+                                RouteId = existRoute.Id,
+                                Version = model.Data.Version
+                            };
+                            await m_storageContext.AddOrUpdate ( routeVersion );
+
+                        } else {
+                            var routeModel = new RouteEntity {
+                                ContentType = route.ContentType,
+                                Method = route.Method,
+                                Path = route.Path,
+                            };
+                            await m_storageContext.AddOrUpdate ( routeModel );
+                            var routeVersion = new RouteVersion {
+                                RouteId = routeModel.Id,
+                                Version = model.Data.Version
+                            };
+                            await m_storageContext.AddOrUpdate ( routeVersion );
+
+                            var routeResources = route.Resources
+                                .Select (
+                                    ( a, index ) => new RouteResource {
+                                        RenderOrder = index,
+                                        ResourceId = resourceIds[a],
+                                        RouteId = routeModel.Id,
+                                    }
+                                )
+                                .ToList ();
+                            foreach ( var routeResource in routeResources ) await m_storageContext.AddOrUpdate ( routeResource );
+                        }
                     }
                 }
            );
         }
 
-        private static void ValidateModel ( ImportVersionModel model, IEnumerable<string> versions ) {
+        private static void ValidateModel ( ImportVersionModel model ) {
             if ( string.IsNullOrEmpty ( model.Data.Version ) ) throw new Exception ( "Model.Data.Version is null of empty!" );
             if ( !model.Routes.Any () && !model.Resources.Any () ) throw new Exception ( "Model.Routes and Model.Resources is empty!" );
 
