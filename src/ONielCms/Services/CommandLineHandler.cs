@@ -19,14 +19,18 @@ namespace ONielCms.Services {
                     "import-file",
                     async ( ImportCommand parameters ) => {
                         var service = new ImportVersionService ( storageContext );
-                        await service.ImportFromFile ( parameters.Path );
+                        try {
+                            await service.ImportFromFile ( parameters.Path );
+                        } catch ( Exception ex ) {
+                            Console.WriteLine ( ex.Message );
+                        }
                     },
                     "Import new version from specified folder",
                     new List<FlowCommandParameter> {
                         FlowCommandParameter.CreateRequired(name: "p", alias: "path", help: "Path to folder where containing new version"),
                     }
                 )
-                .RunCommandAsync();
+                .RunCommandAsync ();
 
             return !result.EmptyInput && ( result.CommandHandled || result.Handled );
         }

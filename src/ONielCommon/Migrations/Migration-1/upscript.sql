@@ -4,6 +4,7 @@ CREATE TABLE edition(
     id uuid DEFAULT uuid_generate_v4(),
     version text NOT NULL UNIQUE,
     created timestamp(6) NOT NULL DEFAULT now(),
+    updated timestamp(6),
     CONSTRAINT pk_edition_id PRIMARY KEY(id)
 );
 CREATE TABLE route(
@@ -42,6 +43,7 @@ CREATE TABLE routeresource(
    resourceid uuid NOT NULL,
    routeid uuid NOT NULL,
    renderOrder int4 NOT NULL,
+   version text,
    CONSTRAINT fk_routeversion_resource FOREIGN KEY (resourceid) REFERENCES resource(id),
    CONSTRAINT fk_routeversion_route FOREIGN KEY (routeid) REFERENCES route(id)
 );

@@ -44,6 +44,16 @@ namespace ONielCms.Services.DatabaseLogic {
 
                     ValidateModel ( model );
 
+                    var version = await m_storageContext.GetSingleAsync<Edition> ( new Query ().Where ( "version", model.Data.Version ) );
+                    if ( version != null ) throw new Exception ( $"Version {model.Data.Version} is already imported!" );
+
+                    await m_storageContext.AddOrUpdate (
+                        new Edition {
+                            Created = DateTime.UtcNow,
+                            Version = model.Data.Version,
+                        }
+                    );
+
                     var resourcesHashes = ( await m_storageContext.GetAsync<ResourceWithoutContent> ( new Query ().Select ( ["id", "identifier", "contenthash"] ) ) )
                         .ToDictionary ( a => a.Identifier );
 
@@ -99,6 +109,17 @@ namespace ONielCms.Services.DatabaseLogic {
                             };
                             await m_storageContext.AddOrUpdate ( routeVersion );
 
+                            var routeResources = route.Resources
+                                .Select (
+                                    ( a, index ) => new RouteResource {
+                                        RenderOrder = index,
+                                        ResourceId = resourceIds[a],
+                                        RouteId = existRoute.Id,
+                                        Version = model.Data.Version,
+                                    }
+                                )
+                                .ToList ();
+                            foreach ( var routeResource in routeResources ) await m_storageContext.AddOrUpdate ( routeResource );
                         } else {
                             var routeModel = new RouteEntity {
                                 ContentType = route.ContentType,
@@ -118,6 +139,7 @@ namespace ONielCms.Services.DatabaseLogic {
                                         RenderOrder = index,
                                         ResourceId = resourceIds[a],
                                         RouteId = routeModel.Id,
+                                        Version = model.Data.Version,
                                     }
                                 )
                                 .ToList ();

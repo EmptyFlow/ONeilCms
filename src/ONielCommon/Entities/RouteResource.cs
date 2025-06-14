@@ -16,6 +16,8 @@ namespace ONielCommon.Entities {
 
         public int RenderOrder { get; set; }
 
+        public string Version { get; set; } = "";
+
     }
 
 }

@@ -1,5 +1,8 @@
-﻿namespace ONielCommon.Entities {
+﻿using ONielCommon.Storage;
 
+namespace ONielCommon.Entities {
+
+    [TableName ( "routeversion" )]
     public class RouteVersion {
 
         public Guid Id { get; init; }
