@@ -1,5 +1,4 @@
-﻿
-using ONielCommon.Entities;
+﻿using ONielCommon.Entities;
 using ONielCommon.Storage;
 using SqlKata;
 using Route = ONielCommon.Entities.Route;
@@ -31,6 +30,29 @@ namespace ONielCms.Services.DatabaseLogic {
                 new Query ()
                     .Where ( "routeid", route.Id )
                     .Where ( "version", edition.Version )
+                    .OrderBy ( "renderorder" )
+            );
+            if ( !routeResources.Any () ) return ([], 204);
+
+            var resources = await _storageContext.GetAsync<Resource> (
+                new Query ()
+                    .Where ( "id", routeResources.Select ( a => a.ResourceId ) )
+            );
+
+            var response = new MemoryStream ();
+            foreach ( var resource in resources ) {
+                await response.WriteAsync ( resource.Content );
+            }
+            response.Position = 0;
+
+            return (response.ToArray (), 200);
+        }
+
+        public async Task<(byte[], int)> GetResponse ( string path, Guid routeId, string version ) {
+            var routeResources = await _storageContext.GetAsync<RouteResource> (
+            new Query ()
+                    .Where ( "routeid", routeId )
+                    .Where ( "version", version )
                     .OrderBy ( "renderorder" )
             );
             if ( !routeResources.Any () ) return ([], 204);

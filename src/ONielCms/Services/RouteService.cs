@@ -1,4 +1,5 @@
-﻿using ONielCommon.Storage;
+﻿using ONielCommon.Entities;
+using ONielCommon.Storage;
 using ONielCommon.Storage.EntityServices;
 using SqlKata;
 using OneilRoute = ONielCommon.Entities.Route;
@@ -11,13 +12,20 @@ namespace ONielCms.Services {
 
         public RouteService ( IStorageContext storageContext ) => m_storageContext = storageContext ?? throw new ArgumentNullException ( nameof ( storageContext ) );
 
-        public Task<IEnumerable<OneilRoute>> GetRoutes ( Action<Query>? adjust = default ) {
-            if ( adjust == null ) return m_storageContext.GetAsync<OneilRoute> ( new Query () );
+        public async Task<IEnumerable<OneilRoute>> GetRoutes () {
+            var edition = await m_storageContext.GetSingleAsync<Edition> (
+                new Query ()
+                    .OrderByDesc ( "created" )
+            );
+            if ( edition == null ) return Enumerable.Empty<OneilRoute> ();
 
-            var query = new Query ();
-            adjust ( query );
-
-            return m_storageContext.GetAsync<OneilRoute> ( query );
+            return await m_storageContext.GetAsync<OneilRoute> (
+                new Query ()
+                    .Join ( "routeversion", "route.id", "routeversion.routeid" )
+                    .Where ( "route.method", "GET" )
+                    .Where ( "routeversion.version", edition.Version )
+                    .SelectRaw ( "route.*" )
+            );
         }
 
         public Task AddOrUpdate ( OneilRoute edition ) => m_storageContext.AddOrUpdate ( edition );
