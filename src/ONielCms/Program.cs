@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using ONielCms;
 using ONielCms.Handlers;
 using ONielCms.Services;
+using ONielCms.Services.DatabaseLogic;
 using ONielCommon.Storage;
+using ONielCommon.Storage.EntityServices;
 
 ConfigurationService.Initialize ();
 var storageService = new StorageContext ( new ConsoleStorageLogger (), new ConfigurationService () );
@@ -13,15 +15,35 @@ var builder = WebApplication.CreateBuilder ( Enumerable.Empty<string> ().ToArray
 
 Dependencies.Resolve ( builder.Services );
 
-
 var app = builder.Build ();
 
 //app.Urls.Add("http://localhost:4000");
 
-var routeBuilder = app.MapGroup ( "/" );
+app.UseRouting ();
+
+app.MapGet ( "/", async (
+    HttpContext context,
+    [FromServices] IRouteResponseService routeResponseService,
+    [FromServices] IRouteService routeService ) => {
+        return await SiteGetHandler.GetHandler ( "/", routeResponseService, routeService );
+    }
+);
+
+app.MapGet ( "/{*path}", async (
+    HttpContext context,
+    [FromRoute] string path,
+    [FromServices] IRouteResponseService routeResponseService,
+    [FromServices] IRouteService routeService ) => {
+        return await SiteGetHandler.GetHandler ( path, routeResponseService, routeService );
+    }
+);
+
+
+/*var routeBuilder = app.MapGroup ( "/" );
+
 routeBuilder.MapGet (
     "/{*path}",
-    SiteHandler.GetHandler
+    SiteGetHandler.GetHandler
 );
 routeBuilder.MapPost (
     "/{*path}",
@@ -48,6 +70,6 @@ routeBuilder.MapPatch (
     ( [FromRoute] string path, HttpContext context ) => {
         return Results.Ok ();
     }
-);
+);*/
 
 app.Run ();
