@@ -28,13 +28,28 @@ app.MapGet ( "/", async (
         return await SiteGetHandler.GetHandler ( "/", routeResponseService, routeService );
     }
 );
-
 app.MapGet ( "/{*path}", async (
     HttpContext context,
     [FromRoute] string path,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
         return await SiteGetHandler.GetHandler ( path, routeResponseService, routeService );
+    }
+);
+
+app.MapPost ( "/", async (
+    HttpContext context,
+    [FromServices] IRouteResponseService routeResponseService,
+    [FromServices] IRouteService routeService ) => {
+        return await SitePostHandler.PostHandler ( "/", routeResponseService, routeService );
+    }
+);
+app.MapPost ( "/{*path}", async (
+    HttpContext context,
+    [FromRoute] string path,
+    [FromServices] IRouteResponseService routeResponseService,
+    [FromServices] IRouteService routeService ) => {
+        return await SitePostHandler.PostHandler ( path, routeResponseService, routeService );
     }
 );
 

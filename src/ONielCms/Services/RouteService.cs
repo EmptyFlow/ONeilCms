@@ -30,6 +30,24 @@ namespace ONielCms.Services {
             return (result, edition.Version);
         }
 
+        public async Task<(IEnumerable<OneilRoute>, string)> PostRoutes () {
+            var edition = await m_storageContext.GetSingleAsync<Edition> (
+                new Query ()
+                    .OrderByDesc ( "created" )
+            );
+            if ( edition == null ) return (Enumerable.Empty<OneilRoute> (), "");
+
+            var result = await m_storageContext.GetAsync<OneilRoute> (
+                new Query ()
+                    .Join ( "routeversion", "route.id", "routeversion.routeid" )
+                    .Where ( "route.method", "POST" )
+                    .Where ( "routeversion.version", edition.Version )
+                    .SelectRaw ( "route.*" )
+            );
+
+            return (result, edition.Version);
+        }
+
         public Task AddOrUpdate ( OneilRoute edition ) => m_storageContext.AddOrUpdate ( edition );
 
         public Task Delete ( Guid id ) => m_storageContext.Delete<OneilRoute> ( new Query ().Where ( "id", id.ToString () ) );

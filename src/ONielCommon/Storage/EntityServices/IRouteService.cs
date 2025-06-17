@@ -6,6 +6,8 @@ namespace ONielCommon.Storage.EntityServices {
 
         Task<(IEnumerable<Route>, string)> GetRoutes ();
 
+        Task<(IEnumerable<Route>, string)> PostRoutes ();
+
         Task AddOrUpdate ( Route edition );
 
         Task Delete ( Guid id );

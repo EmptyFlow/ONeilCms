@@ -1,0 +1,48 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using ONielCms.Services.DatabaseLogic;
+using ONielCommon.Storage.EntityServices;
+using System.Text;
+
+namespace ONielCms.Handlers {
+
+    public static class SitePostHandler {
+
+        public static async Task<IResult> PostHandler (
+            [FromRoute] string path,
+            [FromServices] IRouteResponseService routeResponseService,
+            [FromServices] IRouteService routeService ) {
+            try {
+                if ( !m_loaded ) await LoadRoutes ( routeService );
+
+                var routePair = m_routeHandler?.GetRoute ( path ) ?? null;
+                if ( routePair != null ) {
+                    var route = routePair.Value.routeId;
+                    var response = await routeResponseService.GetResponse ( path, route.Id, m_routeHandler?.Version ?? "" );
+                    var content = Encoding.UTF8.GetString ( response.Item1 );
+                    return Results.Content ( content, route.ContentType, Encoding.UTF8 );
+                    //return Results.File ( response.Item1, route.ContentType, fileDownloadName: "test.html" );
+                }
+                if ( routePair == null ) return Results.NotFound ();
+
+                return Results.Ok ();
+            } catch {
+                return Results.Problem ( statusCode: 500 );
+            }
+        }
+
+        private static RouteHandler? m_routeHandler = null;
+
+        private static bool m_loaded = false;
+
+        public static async Task LoadRoutes ( IRouteService routeService ) {
+            var (routes, currentVersion) = await routeService.PostRoutes ();
+
+            m_routeHandler = new RouteHandler ();
+            m_routeHandler.FillRoutesCache ( currentVersion, routes );
+
+            m_loaded = true;
+        }
+
+    }
+
+}

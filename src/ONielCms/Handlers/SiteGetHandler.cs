@@ -27,7 +27,7 @@ namespace ONielCms.Handlers {
                 if ( routePair == null ) return Results.NotFound ();
 
                 return Results.Ok ();
-            } catch ( Exception e ) {
+            } catch {
                 return Results.Problem ( statusCode: 500 );
             }
         }
