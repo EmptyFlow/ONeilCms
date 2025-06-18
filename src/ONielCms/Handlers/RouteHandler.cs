@@ -1,18 +1,18 @@
 ﻿using System.Text.RegularExpressions;
-using Route = ONielCommon.Entities.Route;
+using SiteRoute = ONielCommon.Entities.SiteRoute;
 
 namespace ONielCms.Handlers {
     public class RouteHandler {
 
-        private Dictionary<string, Route> m_preciousRoutes = new ();
+        private Dictionary<string, SiteRoute> m_preciousRoutes = new ();
 
-        private Dictionary<Regex, (string, Route)> m_dynamicRoutes = new ();
+        private Dictionary<Regex, (string, SiteRoute)> m_dynamicRoutes = new ();
 
         private string m_version = "";
 
         public string Version => m_version;
 
-        public void FillRoutesCache ( string version, IEnumerable<Route> routes ) {
+        public void FillRoutesCache ( string version, IEnumerable<SiteRoute> routes ) {
             m_version = version;
             if ( routes == null ) return;
 
@@ -41,7 +41,7 @@ namespace ONielCms.Handlers {
             return new Regex ( result.Replace ( "/", @"\/" ) );
         }
 
-        public (string route, Route routeId)? GetRoute ( string path ) {
+        public (string route, SiteRoute routeId)? GetRoute ( string path ) {
             if ( m_preciousRoutes.TryGetValue ( path, out var routeId ) ) return (path, routeId);
 
             var dynamicRouteKey = m_dynamicRoutes.Keys.FirstOrDefault ( a => a.IsMatch ( path ) );

@@ -1,7 +1,7 @@
 ﻿using ONielCommon.Entities;
 using ONielCommon.Storage;
 using SqlKata;
-using Route = ONielCommon.Entities.Route;
+using SiteRoute = ONielCommon.Entities.SiteRoute;
 
 namespace ONielCms.Services.DatabaseLogic {
 
@@ -18,7 +18,7 @@ namespace ONielCms.Services.DatabaseLogic {
             );
             if ( edition == null ) return ([], 500);
 
-            var route = await _storageContext.GetSingleAsync<Route> (
+            var route = await _storageContext.GetSingleAsync<SiteRoute> (
                 new Query ()
                     .Where ( "method", "GET" )
                     .Where ( "path", path.ToLowerInvariant () )

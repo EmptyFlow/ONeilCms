@@ -6,7 +6,7 @@ namespace ONielCommon.Entities {
     /// Website route.
     /// </summary>
     [TableName("route")]
-    public record Route {
+    public record SiteRoute {
 
         public Guid Id { get; init; }
 
@@ -15,6 +15,10 @@ namespace ONielCommon.Entities {
         public string ContentType { get; init; } = "";
 
         public string Method { get; init; } = "";
+
+        public bool DownloadAsFile { get; set; }
+
+        public string DownloadFileName { get; set; } = "";
 
     }
 

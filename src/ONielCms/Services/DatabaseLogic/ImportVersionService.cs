@@ -5,7 +5,7 @@ using SqlKata;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using RouteEntity = ONielCommon.Entities.Route;
+using RouteEntity = ONielCommon.Entities.SiteRoute;
 
 namespace ONielCms.Services.DatabaseLogic {
 
@@ -123,7 +123,7 @@ namespace ONielCms.Services.DatabaseLogic {
                         } else {
                             var routeModel = new RouteEntity {
                                 ContentType = route.ContentType,
-                                Method = route.Method,
+                                Method = GetMethodName ( route.Method ),
                                 Path = route.Path,
                             };
                             await m_storageContext.AddOrUpdate ( routeModel );
@@ -149,6 +149,15 @@ namespace ONielCms.Services.DatabaseLogic {
                 }
            );
         }
+
+        private static string GetMethodName ( string method ) => method.ToLowerInvariant () switch {
+            "get" => "GET",
+            "post" => "POST",
+            "put" => "POST",
+            "delete" => "DELETE",
+            "patch" => "PATCH",
+            _ => throw new NotSupportedException ( $"Method {method} not supported!" )
+        };
 
         private static void ValidateModel ( ImportVersionModel model ) {
             if ( string.IsNullOrEmpty ( model.Data.Version ) ) throw new Exception ( "Model.Data.Version is null of empty!" );

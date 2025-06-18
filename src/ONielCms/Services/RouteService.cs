@@ -2,7 +2,7 @@
 using ONielCommon.Storage;
 using ONielCommon.Storage.EntityServices;
 using SqlKata;
-using OneilRoute = ONielCommon.Entities.Route;
+using OneilRoute = ONielCommon.Entities.SiteRoute;
 
 namespace ONielCms.Services {
 

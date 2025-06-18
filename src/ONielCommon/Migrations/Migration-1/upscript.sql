@@ -12,6 +12,8 @@ CREATE TABLE route(
     path text NOT NULL,
     contentType text NOT NULL,
     method text NOT NULL,
+    downloadasfile bool NOT NULL DEFAULT false,
+    downloadfilename text,
     CONSTRAINT pk_route_id PRIMARY KEY (id)
 );
 CREATE TABLE routeversion(

@@ -25,7 +25,7 @@ app.MapGet ( "/", async (
     HttpContext context,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SiteGetHandler.GetHandler ( "/", routeResponseService, routeService );
+        return await SiteGetHandler.GetHandler ( context, "/", routeResponseService, routeService );
     }
 );
 app.MapGet ( "/{*path}", async (
@@ -33,7 +33,7 @@ app.MapGet ( "/{*path}", async (
     [FromRoute] string path,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SiteGetHandler.GetHandler ( path, routeResponseService, routeService );
+        return await SiteGetHandler.GetHandler ( context, path, routeResponseService, routeService );
     }
 );
 
@@ -41,7 +41,7 @@ app.MapPost ( "/", async (
     HttpContext context,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SitePostHandler.PostHandler ( "/", routeResponseService, routeService );
+        return await SitePostHandler.PostHandler ( context, "/", routeResponseService, routeService );
     }
 );
 app.MapPost ( "/{*path}", async (
@@ -49,7 +49,7 @@ app.MapPost ( "/{*path}", async (
     [FromRoute] string path,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SitePostHandler.PostHandler ( path, routeResponseService, routeService );
+        return await SitePostHandler.PostHandler ( context, path, routeResponseService, routeService );
     }
 );
 

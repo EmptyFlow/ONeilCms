@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using ONielCms.Services.DatabaseLogic;
+﻿using ONielCms.Services.DatabaseLogic;
 using ONielCommon.Storage.EntityServices;
 using System.Text;
 
@@ -7,10 +6,7 @@ namespace ONielCms.Handlers {
 
     public static class SitePostHandler {
 
-        public static async Task<IResult> PostHandler (
-            [FromRoute] string path,
-            [FromServices] IRouteResponseService routeResponseService,
-            [FromServices] IRouteService routeService ) {
+        public static async Task<IResult> PostHandler ( HttpContext httpContext, string path, IRouteResponseService routeResponseService, IRouteService routeService ) {
             try {
                 if ( !m_loaded ) await LoadRoutes ( routeService );
 
@@ -18,9 +14,13 @@ namespace ONielCms.Handlers {
                 if ( routePair != null ) {
                     var route = routePair.Value.routeId;
                     var response = await routeResponseService.GetResponse ( path, route.Id, m_routeHandler?.Version ?? "" );
-                    var content = Encoding.UTF8.GetString ( response.Item1 );
-                    return Results.Content ( content, route.ContentType, Encoding.UTF8 );
-                    //return Results.File ( response.Item1, route.ContentType, fileDownloadName: "test.html" );
+
+                    if ( route.DownloadAsFile && !string.IsNullOrEmpty ( route.DownloadFileName ) ) {
+                        return Results.File ( response.Item1, route.ContentType, fileDownloadName: route.DownloadFileName );
+                    } else {
+                        var content = Encoding.UTF8.GetString ( response.Item1 );
+                        return Results.Content ( content, route.ContentType, Encoding.UTF8 );
+                    }
                 }
                 if ( routePair == null ) return Results.NotFound ();
 
