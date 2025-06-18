@@ -1,8 +1,6 @@
 ﻿using ONielCms.Services.DatabaseLogic;
 using ONielCommon.Storage.EntityServices;
 using System.Text;
-using System.Text.RegularExpressions;
-using SiteRoute = ONielCommon.Entities.SiteRoute;
 
 namespace ONielCms.Handlers {
 
@@ -42,7 +40,7 @@ namespace ONielCms.Handlers {
         private static bool m_loaded = false;
 
         public static async Task LoadRoutes ( IRouteService routeService ) {
-            var (routes, currentVersion) = await routeService.PostRoutes ();
+            var (routes, currentVersion) = await routeService.GetRoutes ();
 
             m_routeHandler = new RouteHandler ();
             m_routeHandler.FillRoutesCache ( currentVersion, routes );

@@ -42,6 +42,9 @@ namespace ONielCms.Handlers {
         }
 
         public (string route, SiteRoute routeId)? GetRoute ( string path ) {
+            // if we have relative path without protocol and not started with /, we add it forcefully
+            if ( path != "/" && !path.Contains(":") && !path.StartsWith("http") && !path.StartsWith ( "/" ) ) path = "/" + path;
+
             if ( m_preciousRoutes.TryGetValue ( path, out var routeId ) ) return (path, routeId);
 
             var dynamicRouteKey = m_dynamicRoutes.Keys.FirstOrDefault ( a => a.IsMatch ( path ) );

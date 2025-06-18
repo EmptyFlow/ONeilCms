@@ -297,6 +297,14 @@ namespace ONielCommon.Storage {
             m_groupedTransaction = groupedTransaction;
         }
 
+        private async Task RevertTransation ( bool groupedTransaction = false ) {
+            if ( m_transaction == null ) return;
+            if ( m_groupedTransaction == true && !groupedTransaction ) return;
+
+            await m_transaction.RollbackAsync ();
+            await m_transaction.DisposeAsync ();
+        }
+
         private async Task CommitTransation ( bool groupedTransaction = false ) {
             if ( m_transaction == null ) return;
             if ( m_groupedTransaction == true && !groupedTransaction ) return;
@@ -400,7 +408,12 @@ namespace ONielCommon.Storage {
         public async Task MakeInTransaction ( Func<Task> action ) {
             await BeginTransaction ( groupedTransaction: true );
 
-            await action ();
+            try {
+                await action ();
+            } catch {
+                await RevertTransation ( groupedTransaction: true );
+                throw;
+            }
 
             await CommitTransation ( groupedTransaction: true );
         }
@@ -408,11 +421,16 @@ namespace ONielCommon.Storage {
         public async Task<T> MakeInTransaction<T> ( Func<Task<T>> action ) {
             await BeginTransaction ( groupedTransaction: true );
 
-            var result = await action ();
+            try {
+                var result = await action ();
 
-            await CommitTransation ( groupedTransaction: true );
+                await CommitTransation ( groupedTransaction: true );
 
-            return result;
+                return result;
+            } catch {
+                await RevertTransation ( groupedTransaction: true );
+                throw;
+            }
         }
 
         public async Task Delete<T> ( Query query ) {

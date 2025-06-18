@@ -7,13 +7,167 @@
 			"path": "/",
 			"contentType": "text/html",
 			"method": "GET",
-			"resources":["root"]
+			"resources":["index.html"]
+		},
+		{
+			"path": "/css/bootstrap.min.css",
+			"contentType": "text/css",
+			"method": "GET",
+			"resources":["css/bootstrap.min.css"]
+		},
+		{
+			"path": "/css/bootstrap-icons.css",
+			"contentType": "text/css",
+			"method": "GET",
+			"resources":["css/bootstrap-icons.css"]
+		},
+		{
+			"path": "/css/templatemo-topic-listing.css",
+			"contentType": "text/css",
+			"method": "GET",
+			"resources":["css/templatemo-topic-listing.css"]
+		},
+		{
+			"path": "/fonts/bootstrap-icons.woff",
+			"contentType": "font/woff",
+			"method": "GET",
+			"downloadAsFile": true,
+			"downloadFileName": "bootstrap-icons.woff",
+			"resources":["fonts/bootstrap-icons.woff"]
+		},
+		{
+			"path": "/fonts/bootstrap-icons.woff2",
+			"contentType": "font/woff2",
+			"method": "GET",
+			"downloadAsFile": true,
+			"downloadFileName": "bootstrap-icons.woff2",
+			"resources":["fonts/bootstrap-icons.woff2"]
+		},
+		{
+			"path": "/images/businesswoman-using-tablet-analysis.jpg",
+			"contentType": "image/jpeg",
+			"method": "GET",
+			"downloadAsFile": true,
+			"downloadFileName": "businesswoman-using-tablet-analysis.jpg",
+			"resources":["images/businesswoman-using-tablet-analysis.jpg"]
+		},
+		{
+			"path": "/images/colleagues-working-cozy-office-medium-shot.jpg",
+			"contentType": "image/jpeg",
+			"method": "GET",
+			"downloadAsFile": true,
+			"downloadFileName": "colleagues-working-cozy-office-medium-shot.jpg",
+			"resources":["images/colleagues-working-cozy-office-medium-shot.jpg"]
+		},
+		{
+			"path": "/images/faq_graphic.jpg",
+			"contentType": "image/jpeg",
+			"method": "GET",
+			"downloadAsFile": true,
+			"downloadFileName": "faq_graphic.jpg",
+			"resources":["images/faq_graphic.jpg"]
+		},
+		{
+			"path": "/images/rear-view-young-college-student.jpg",
+			"contentType": "image/jpeg",
+			"method": "GET",
+			"downloadAsFile": true,
+			"downloadFileName": "rear-view-young-college-student.jpg",
+			"resources":["images/rear-view-young-college-student.jpg"]
+		},
+		{
+			"path": "/js/bootstrap.bundle.min.js",
+			"contentType": "text/javascript",
+			"method": "GET",
+			"resources":["js/bootstrap.bundle.min.js"]
+		},
+		{
+			"path": "/js/click-scroll.js",
+			"contentType": "text/javascript",
+			"method": "GET",
+			"resources":["js/click-scroll.js"]
+		},
+		{
+			"path": "/js/custom.js",
+			"contentType": "text/javascript",
+			"method": "GET",
+			"resources":["js/custom.js"]
+		},
+		{
+			"path": "/js/jquery.min.js",
+			"contentType": "text/javascript",
+			"method": "GET",
+			"resources":["js/jquery.min.js"]
+		},
+		{
+			"path": "/js/jquery.sticky.js",
+			"contentType": "text/javascript",
+			"method": "GET",
+			"resources":["js/jquery.sticky.js"]
 		}		
 	],
 	"resources": [
 		{
-			"id": "root",
-			"rawContent": "<html><body><span>Hello World!!!</span></body></html>"
+			"id": "index.html",
+			"fileContent": "c:/work/Repositories/OnCms/testtemplate/index.html"
+		},
+		{
+			"id": "css/bootstrap.min.css",
+			"fileContent": "c:/work/Repositories/OnCms/testtemplate/css/bootstrap.min.css"
+		},
+		{
+			"id": "css/bootstrap-icons.css",
+			"fileContent": "c:/work/Repositories/OnCms/testtemplate/css/bootstrap-icons.css"
+		},
+		{
+			"id": "css/templatemo-topic-listing.css",
+			"fileContent": "c:/work/Repositories/OnCms/testtemplate/css/templatemo-topic-listing.css"
+		},
+		{
+			"id": "fonts/bootstrap-icons.woff",
+			"fileContent": "c:/work/Repositories/OnCms/testtemplate/fonts/bootstrap-icons.woff"
+		},
+		{
+			"id": "fonts/bootstrap-icons.woff2",
+			"fileContent": "c:/work/Repositories/OnCms/testtemplate/fonts/bootstrap-icons.woff2"
+		},
+		{
+			"id": "images/businesswoman-using-tablet-analysis.jpg",
+			"fileContent": "c:/work/Repositories/OnCms/testtemplate/images/businesswoman-using-tablet-analysis.jpg"
+		},
+		{
+			"id": "images/colleagues-working-cozy-office-medium-shot.jpg",
+			"fileContent": "c:/work/Repositories/OnCms/testtemplate/images/colleagues-working-cozy-office-medium-shot.jpg"
+		},
+		{
+			"id": "images/faq_graphic.jpg",
+			"fileContent": "c:/work/Repositories/OnCms/testtemplate/images/faq_graphic.jpg"
+		},
+		{
+			"id": "images/rear-view-young-college-student.jpg",
+			"fileContent": "c:/work/Repositories/OnCms/testtemplate/images/rear-view-young-college-student.jpg"
+		}
+		
+		,
+		{
+			"id": "js/bootstrap.bundle.min.js",
+			"fileContent": "c:/work/Repositories/OnCms/testtemplate/js/bootstrap.bundle.min.js"
+		},
+		{
+			"id": "js/click-scroll.js",
+			"fileContent": "c:/work/Repositories/OnCms/testtemplate/js/click-scroll.js"
+		},
+		{
+			"id": "js/custom.js",
+			"fileContent": "c:/work/Repositories/OnCms/testtemplate/js/custom.js"
+		},
+		{
+			"id": "js/jquery.min.js",
+			"fileContent": "c:/work/Repositories/OnCms/testtemplate/js/jquery.min.js"
+		},
+		{
+			"id": "js/jquery.sticky.js",
+			"fileContent": "c:/work/Repositories/OnCms/testtemplate/js/jquery.sticky.js"
 		}
 	]
 }

@@ -15,15 +15,18 @@ namespace ONielCms.Services.DatabaseLogic {
 
         public ImportVersionService ( IStorageContext storageContext ) => m_storageContext = storageContext;
 
-        private string CalculateHash ( string rawContent ) {
-            using var sha256 = SHA256.Create ();
-            var hashBytes = sha256.ComputeHash ( Encoding.UTF8.GetBytes ( rawContent ) );
+        private static string CalculateHash ( string rawContent ) => CalculateHash ( Encoding.UTF8.GetBytes ( rawContent ) );
+
+        private static string CalculateHash ( byte[] bytes ) {
+            var hashBytes = SHA256.HashData ( bytes );
             return BitConverter.ToString ( hashBytes ).Replace ( "-", "" ).ToLowerInvariant ();
         }
 
         public Task ImportFromFile ( string fileName ) {
             return m_storageContext.MakeInTransaction (
                 async () => {
+                    fileName = Path.GetFullPath ( fileName );
+
                     if ( !File.Exists ( fileName ) ) {
                         Console.WriteLine ( $"File by path: {fileName} not found!" );
                         return;
@@ -65,6 +68,14 @@ namespace ONielCms.Services.DatabaseLogic {
                             bytes = Encoding.UTF8.GetBytes ( resource.RawContent );
                             hash = CalculateHash ( resource.RawContent );
                         }
+                        if ( resource.FileContent != null ) {
+                            try {
+                                bytes = File.ReadAllBytes ( resource.FileContent );
+                                hash = CalculateHash ( bytes );
+                            } catch ( Exception readFileException ) {
+                                throw new Exception ( $"Can't read file {resource.FileContent}: {readFileException.Message}" );
+                            }
+                        }
                         if ( bytes.Length == 0 ) continue;
 
                         if ( resourcesHashes.TryGetValue ( resource.Id, out var currentHash ) && hash == currentHash.ContentHash ) {
@@ -82,7 +93,7 @@ namespace ONielCms.Services.DatabaseLogic {
                             var resourceModel = new Resource {
                                 Identifier = resource.Id,
                                 Content = bytes,
-                                ContentHash = hash
+                                ContentHash = hash,
                             };
                             await m_storageContext.AddOrUpdate ( resourceModel );
 
@@ -125,6 +136,8 @@ namespace ONielCms.Services.DatabaseLogic {
                                 ContentType = route.ContentType,
                                 Method = GetMethodName ( route.Method ),
                                 Path = route.Path,
+                                DownloadAsFile = route.DownloadAsFile,
+                                DownloadFileName = route.DownloadFileName,
                             };
                             await m_storageContext.AddOrUpdate ( routeModel );
                             var routeVersion = new RouteVersion {
@@ -168,6 +181,14 @@ namespace ONielCms.Services.DatabaseLogic {
                 .Where ( a => a.Count () > 1 )
                 .ToList ();
             if ( duplicates.Any () ) throw new Exception ( $"Model.Resources.Id have duplicates - {string.Join ( ", ", duplicates )}" );
+
+            var fileResources = model.Resources
+                .Where ( a => !string.IsNullOrEmpty ( a.FileContent ) )
+                .Select ( a => a.FileContent!.ToString () )
+                .ToList ();
+            foreach ( var fileResource in fileResources ) {
+                if ( !File.Exists ( Path.GetFullPath ( fileResource ) ) ) throw new Exception ( $"File {fileResource} not found!" );
+            }
 
             var resourceIds = ids
                 .SelectMany ( a => a )
