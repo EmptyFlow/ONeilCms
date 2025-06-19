@@ -11,6 +11,8 @@ var storageService = new StorageContext ( new ConsoleStorageLogger (), new Confi
 
 if ( await CommandLineHandler.HandleCommandLine ( storageService ) ) return;
 
+Console.WriteLine ( "No commands passed, start to server" );
+
 var builder = WebApplication.CreateBuilder ( Enumerable.Empty<string> ().ToArray () );
 
 Dependencies.Resolve ( builder.Services );
@@ -21,11 +23,13 @@ var app = builder.Build ();
 
 app.UseRouting ();
 
+// Get Handler
+
 app.MapGet ( "/", async (
     HttpContext context,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SiteGetHandler.GetHandler ( context, "/", routeResponseService, routeService );
+        return await SiteGetHandler.Handler ( context, "/", routeResponseService, routeService );
     }
 );
 app.MapGet ( "/{*path}", async (
@@ -33,15 +37,17 @@ app.MapGet ( "/{*path}", async (
     [FromRoute] string path,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SiteGetHandler.GetHandler ( context, path, routeResponseService, routeService );
+        return await SiteGetHandler.Handler ( context, path, routeResponseService, routeService );
     }
 );
+
+// Post Handler
 
 app.MapPost ( "/", async (
     HttpContext context,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SitePostHandler.PostHandler ( context, "/", routeResponseService, routeService );
+        return await SitePostHandler.Handler ( context, "/", routeResponseService, routeService );
     }
 );
 app.MapPost ( "/{*path}", async (
@@ -49,42 +55,44 @@ app.MapPost ( "/{*path}", async (
     [FromRoute] string path,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SitePostHandler.PostHandler ( context, path, routeResponseService, routeService );
+        return await SitePostHandler.Handler ( context, path, routeResponseService, routeService );
     }
 );
 
+// Put Handler
 
-/*var routeBuilder = app.MapGroup ( "/" );
+app.MapPut ( "/", async (
+    HttpContext context,
+    [FromServices] IRouteResponseService routeResponseService,
+    [FromServices] IRouteService routeService ) => {
+        return await SitePutHandler.Handler ( context, "/", routeResponseService, routeService );
+    }
+);
+app.MapPut ( "/{*path}", async (
+    HttpContext context,
+    [FromRoute] string path,
+    [FromServices] IRouteResponseService routeResponseService,
+    [FromServices] IRouteService routeService ) => {
+        return await SitePutHandler.Handler ( context, path, routeResponseService, routeService );
+    }
+);
 
-routeBuilder.MapGet (
-    "/{*path}",
-    SiteGetHandler.GetHandler
-);
-routeBuilder.MapPost (
-    "/{*path}",
-    ( [FromRoute] string path, HttpContext context ) => {
-        //context.Request.Body
-        return Results.Ok ();
+// Delete Handler
+
+app.MapDelete ( "/", async (
+    HttpContext context,
+    [FromServices] IRouteResponseService routeResponseService,
+    [FromServices] IRouteService routeService ) => {
+        return await SiteDeleteHandler.Handler ( context, "/", routeResponseService, routeService );
     }
 );
-routeBuilder.MapPut (
-    "/{*path}",
-    ( [FromRoute] string path, HttpContext context ) => {
-        //context.Request.Body
-        return Results.Ok ();
+app.MapDelete ( "/{*path}", async (
+    HttpContext context,
+    [FromRoute] string path,
+    [FromServices] IRouteResponseService routeResponseService,
+    [FromServices] IRouteService routeService ) => {
+        return await SiteDeleteHandler.Handler ( context, path, routeResponseService, routeService );
     }
 );
-routeBuilder.MapDelete (
-    "/{*path}",
-    ( [FromRoute] string path ) => {
-        return Results.Ok ();
-    }
-);
-routeBuilder.MapPatch (
-    "/{*path}",
-    ( [FromRoute] string path, HttpContext context ) => {
-        return Results.Ok ();
-    }
-);*/
 
 app.Run ();

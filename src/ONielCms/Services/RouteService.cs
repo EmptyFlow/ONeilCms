@@ -12,25 +12,17 @@ namespace ONielCms.Services {
 
         public RouteService ( IStorageContext storageContext ) => m_storageContext = storageContext ?? throw new ArgumentNullException ( nameof ( storageContext ) );
 
-        public async Task<(IEnumerable<OneilRoute>, string)> GetRoutes () {
-            var edition = await m_storageContext.GetSingleAsync<Edition> (
-                new Query ()
-                    .OrderByDesc ( "created" )
-            );
-            if ( edition == null ) return (Enumerable.Empty<OneilRoute> (), "");
-
-            var result = await m_storageContext.GetAsync<OneilRoute> (
+        public async Task<IEnumerable<OneilRoute>> GetAllRoutesInVersion ( string version, string method ) {
+            return await m_storageContext.GetAsync<OneilRoute> (
                 new Query ()
                     .Join ( "routeversion", "route.id", "routeversion.routeid" )
-                    .Where ( "route.method", "GET" )
-                    .Where ( "routeversion.version", edition.Version )
+                    .Where ( "route.method", method )
+                    .Where ( "routeversion.version", version )
                     .SelectRaw ( "route.*" )
             );
-
-            return (result, edition.Version);
         }
 
-        public async Task<(IEnumerable<OneilRoute>, string)> PostRoutes () {
+        public async Task<(IEnumerable<OneilRoute>, string)> GetAllRoutesInCurrentVersion ( string method ) {
             var edition = await m_storageContext.GetSingleAsync<Edition> (
                 new Query ()
                     .OrderByDesc ( "created" )
@@ -40,7 +32,7 @@ namespace ONielCms.Services {
             var result = await m_storageContext.GetAsync<OneilRoute> (
                 new Query ()
                     .Join ( "routeversion", "route.id", "routeversion.routeid" )
-                    .Where ( "route.method", "POST" )
+                    .Where ( "route.method", method )
                     .Where ( "routeversion.version", edition.Version )
                     .SelectRaw ( "route.*" )
             );

@@ -6,7 +6,7 @@ namespace ONielCms.Handlers {
 
     public static class SitePostHandler {
 
-        public static async Task<IResult> PostHandler ( HttpContext httpContext, string path, IRouteResponseService routeResponseService, IRouteService routeService ) {
+        public static async Task<IResult> Handler ( HttpContext httpContext, string path, IRouteResponseService routeResponseService, IRouteService routeService ) {
             try {
                 if ( !m_loaded ) await LoadRoutes ( routeService );
 
@@ -35,7 +35,7 @@ namespace ONielCms.Handlers {
         private static bool m_loaded = false;
 
         public static async Task LoadRoutes ( IRouteService routeService ) {
-            var (routes, currentVersion) = await routeService.PostRoutes ();
+            var (routes, currentVersion) = await routeService.GetAllRoutesInCurrentVersion ( "POST" );
 
             m_routeHandler = new RouteHandler ();
             m_routeHandler.FillRoutesCache ( currentVersion, routes );

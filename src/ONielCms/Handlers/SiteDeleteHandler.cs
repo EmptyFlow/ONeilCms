@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ONielCms.Handlers {
 
-    public static class SiteGetHandler {
+    public static class SiteDeleteHandler {
 
         public static async Task<IResult> Handler (
             HttpContext httpContext,
@@ -40,7 +40,7 @@ namespace ONielCms.Handlers {
         private static bool m_loaded = false;
 
         public static async Task LoadRoutes ( IRouteService routeService ) {
-            var (routes, currentVersion) = await routeService.GetAllRoutesInCurrentVersion ( "GET" );
+            var (routes, currentVersion) = await routeService.GetAllRoutesInCurrentVersion ( "DELETE" );
 
             m_routeHandler = new RouteHandler ();
             m_routeHandler.FillRoutesCache ( currentVersion, routes );

@@ -4,9 +4,9 @@ namespace ONielCommon.Storage.EntityServices {
 
     public interface IRouteService {
 
-        Task<(IEnumerable<SiteRoute>, string)> GetRoutes ();
+        Task<IEnumerable<SiteRoute>> GetAllRoutesInVersion ( string version, string method );
 
-        Task<(IEnumerable<SiteRoute>, string)> PostRoutes ();
+        Task<(IEnumerable<SiteRoute>, string)> GetAllRoutesInCurrentVersion ( string method );
 
         Task AddOrUpdate ( SiteRoute edition );
 

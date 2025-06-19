@@ -4,17 +4,13 @@ using System.Text;
 
 namespace ONielCms.Handlers {
 
-    public static class SiteGetHandler {
+    public static class SitePutHandler {
 
-        public static async Task<IResult> Handler (
-            HttpContext httpContext,
-            string path,
-            IRouteResponseService routeResponseService,
-            IRouteService routeService ) {
+        public static async Task<IResult> Handler ( HttpContext httpContext, string path, IRouteResponseService routeResponseService, IRouteService routeService ) {
             try {
                 if ( !m_loaded ) await LoadRoutes ( routeService );
 
-                var routePair = m_routeHandler?.GetRoute ( path );
+                var routePair = m_routeHandler?.GetRoute ( path ) ?? null;
                 if ( routePair != null ) {
                     var route = routePair.Value.routeId;
                     var response = await routeResponseService.GetResponse ( path, route.Id, m_routeHandler?.Version ?? "" );
@@ -25,7 +21,6 @@ namespace ONielCms.Handlers {
                         var content = Encoding.UTF8.GetString ( response.Item1 );
                         return Results.Content ( content, route.ContentType, Encoding.UTF8 );
                     }
-
                 }
                 if ( routePair == null ) return Results.NotFound ();
 
@@ -40,7 +35,7 @@ namespace ONielCms.Handlers {
         private static bool m_loaded = false;
 
         public static async Task LoadRoutes ( IRouteService routeService ) {
-            var (routes, currentVersion) = await routeService.GetAllRoutesInCurrentVersion ( "GET" );
+            var (routes, currentVersion) = await routeService.GetAllRoutesInCurrentVersion ( "PUT" );
 
             m_routeHandler = new RouteHandler ();
             m_routeHandler.FillRoutesCache ( currentVersion, routes );
