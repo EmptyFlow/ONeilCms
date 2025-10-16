@@ -8,6 +8,8 @@ namespace ONielCms.Services {
 
         public string Path { get; set; } = "";
 
+        public string Version { get; set; } = "";
+
     }
 
     public static class CommandLineHandler {
@@ -28,6 +30,22 @@ namespace ONielCms.Services {
                     "Import new version from specified folder",
                     new List<FlowCommandParameter> {
                         FlowCommandParameter.CreateRequired(name: "p", alias: "path", help: "Path to folder where containing new version"),
+                    }
+                )
+                .AddAsyncCommand (
+                    "import-folder",
+                    async ( ImportCommand parameters ) => {
+                        var service = new ImportVersionService ( storageContext );
+                        try {
+                            await service.ImportFromFolder ( parameters.Path, parameters.Version );
+                        } catch ( Exception ex ) {
+                            Console.WriteLine ( ex.Message );
+                        }
+                    },
+                    "Import new version from specified folder",
+                    new List<FlowCommandParameter> {
+                        FlowCommandParameter.CreateRequired(name: "p", alias: "path", help: "Path to folder where need import files"),
+                        FlowCommandParameter.CreateRequired(name: "v", alias: "version", help: "Version related to "),
                     }
                 )
                 .RunCommandAsync ();

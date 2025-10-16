@@ -1,4 +1,5 @@
-﻿using ONielCms.Models;
+﻿using Microsoft.AspNetCore.StaticFiles;
+using ONielCms.Models;
 using ONielCommon.Entities;
 using ONielCommon.Storage;
 using SqlKata;
@@ -126,10 +127,10 @@ namespace ONielCms.Services.DatabaseLogic {
                                         RenderOrder = index,
                                         ResourceId = resourceIds[a],
                                         RouteId = existRoute.Id,
-                                        Version = model.Data.Version,
                                     }
                                 )
                                 .ToList ();
+
                             foreach ( var routeResource in routeResources ) await m_storageContext.AddOrUpdate ( routeResource );
                         } else {
                             var routeModel = new RouteEntity {
@@ -152,7 +153,6 @@ namespace ONielCms.Services.DatabaseLogic {
                                         RenderOrder = index,
                                         ResourceId = resourceIds[a],
                                         RouteId = routeModel.Id,
-                                        Version = model.Data.Version,
                                     }
                                 )
                                 .ToList ();
@@ -199,6 +199,146 @@ namespace ONielCms.Services.DatabaseLogic {
                     .ToList ();
                 if ( notExists.Any () ) throw new Exception ( $"Model.Routes.Resources ({route}) have not exists resources - {string.Join ( ", ", notExists )}" );
             }
+        }
+
+        /// <summary>
+        /// Import version from folder.
+        /// </summary>
+        /// <param name="path">Path to filder.</param>
+        public Task ImportFromFolder ( string path, string desiredVersion ) {
+            return m_storageContext.MakeInTransaction (
+                async () => {
+                    if ( !Path.Exists ( path ) ) {
+                        Console.WriteLine ( $"Path {path} not found!" );
+                        return;
+                    }
+
+                    var directoryInfo = new DirectoryInfo ( path );
+                    var files = directoryInfo.GetFiles ( "*", SearchOption.AllDirectories )
+                        .ToList ();
+
+                    var version = await m_storageContext.GetSingleAsync<Edition> ( new Query ().Where ( "version", desiredVersion ) );
+                    if ( version == null ) {
+                        version = new Edition {
+                            Created = DateTime.UtcNow,
+                            Version = desiredVersion,
+                        };
+                        await m_storageContext.AddOrUpdate ( version );
+                    }
+
+                    var existsRoutes = ( await m_storageContext.GetAsync<RouteEntity> ( new Query ().Where ( "method", "GET" ) ) )
+                        .ToDictionary ( a => a.Path );
+
+                    var resourcesHashes = ( await m_storageContext.GetAsync<ResourceWithoutContent> ( new Query ().Select ( ["id", "identifier", "contenthash"] ) ) )
+                        .ToDictionary ( a => a.Identifier );
+
+                    foreach ( var file in files ) {
+                        var nameOfResource = file.FullName.Replace ( "\\", "/" ).Substring ( path.Length + 1 );
+                        var nameOfRoute = "/" + nameOfResource;
+
+                        var bytes = File.ReadAllBytes ( file.FullName );
+                        var hash = CalculateHash ( bytes );
+
+                        if ( resourcesHashes.TryGetValue ( nameOfResource, out var existsResource ) ) {
+                            await m_storageContext.MakeNoResult<Resource> (
+                                new Query ()
+                                    .Where ( "id", existsResource.Id )
+                                    .AsUpdate ( new { content = bytes } )
+                            );
+                            continue;
+                        }
+
+                        if ( existsRoutes.TryGetValue ( nameOfRoute, out var existRoute ) ) {
+                            await SaveResource ( nameOfResource, bytes, hash, existRoute.Id, desiredVersion );
+                            await SaveRouteVersion ( existRoute.Id, desiredVersion );
+                            continue;
+                        }
+
+                        var mimeType = GetMimeTypeForFileExtension ( nameOfResource );
+                        var isDownloadble = isDownloadbleFile ( mimeType );
+                        var newRoute = new RouteEntity {
+                            Method = "GET",
+                            ContentType = mimeType,
+                            DownloadAsFile = isDownloadble,
+                            DownloadFileName = isDownloadble ? Path.GetFileName ( nameOfResource ) : "",
+                            Path = nameOfRoute
+                        };
+                        await m_storageContext.AddOrUpdate ( newRoute );
+
+                        await SaveRouteVersion ( newRoute.Id, desiredVersion );
+                        await SaveResource ( nameOfResource, bytes, hash, newRoute.Id, desiredVersion );
+                    }
+                }
+            );
+        }
+
+        private async Task SaveRouteVersion ( Guid routeId, string version ) {
+            var hasVersion = await m_storageContext.GetSingleAsync<RouteVersion> (
+                new Query ().Where ( "version", version ).Where ( "routeid", routeId )
+            );
+            if ( hasVersion != null ) return;
+
+            await m_storageContext.AddOrUpdate (
+                new RouteVersion {
+                    RouteId = routeId,
+                    Version = version
+                }
+            );
+        }
+
+        private async Task SaveResource ( string nameOfResource, byte[] bytes, string hash, Guid routeId, string version ) {
+            var resource = new Resource {
+                Identifier = nameOfResource,
+                Content = bytes,
+                ContentHash = hash,
+            };
+            await m_storageContext.AddOrUpdate ( resource );
+
+            await m_storageContext.AddOrUpdate (
+                new RouteResource {
+                    RenderOrder = 0,
+                    ResourceId = resource.Id,
+                    RouteId = routeId,
+                }
+            );
+
+            var resourceVersion = new ResourceVersion {
+                ResourceId = resource.Id,
+                Version = version
+            };
+            await m_storageContext.AddOrUpdate ( resourceVersion );
+        }
+
+        private string GetMimeTypeForFileExtension ( string filePath ) {
+            const string DefaultContentType = "application/octet-stream";
+
+            var provider = new FileExtensionContentTypeProvider ();
+
+            if ( !provider.TryGetContentType ( filePath, out var contentType ) ) {
+                contentType = DefaultContentType;
+            }
+
+            return contentType;
+        }
+
+        private static bool isDownloadbleFile ( string mimeType ) {
+            switch ( mimeType.ToLowerInvariant () ) {
+                case "text/css":
+                case "text/html":
+                case "text/plain":
+                case "text/javascript":
+                case "text/markdown":
+                case "image/jpeg":
+                case "image/png":
+                case "image/gif":
+                case "image/svg+xml":
+                case "image/webp":
+                case "application/json":
+                case "application/xml":
+                    return false;
+            }
+
+            return true;
         }
 
     }

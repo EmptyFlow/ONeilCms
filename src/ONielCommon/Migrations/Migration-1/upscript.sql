@@ -45,7 +45,6 @@ CREATE TABLE routeresource(
    resourceid uuid NOT NULL,
    routeid uuid NOT NULL,
    renderOrder int4 NOT NULL,
-   version text,
    CONSTRAINT fk_routeversion_resource FOREIGN KEY (resourceid) REFERENCES resource(id),
    CONSTRAINT fk_routeversion_route FOREIGN KEY (routeid) REFERENCES route(id)
 );

@@ -49,7 +49,7 @@ namespace ONielCommon.Storage {
         /// <typeparam name="T">Type of return model.</typeparam>
         /// <param name="query">Query.</param>
         /// <returns>Collection of items.</returns>
-        public Task<IEnumerable<T>> GetAsync<T> ( Query query ) where T : new();
+        public Task<IEnumerable<T>> GetAsync<T> ( Query query, CancellationToken cancellationToken = default ) where T : new();
 
         /// <summary>
         /// Get single item from database.
@@ -57,7 +57,7 @@ namespace ONielCommon.Storage {
         /// <typeparam name="T">Type of return model.</typeparam>
         /// <param name="query">Query.</param>
         /// <returns>Collection of items.</returns>
-        public Task<T?> GetSingleAsync<T> ( Query query ) where T : new();
+        public Task<T?> GetSingleAsync<T> ( Query query, CancellationToken cancellationToken = default ) where T : new();
 
         /// <summary>
         /// Get items from database.

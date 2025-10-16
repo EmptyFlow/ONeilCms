@@ -236,7 +236,7 @@ namespace ONielCommon.Storage {
 
         private static bool IsJsonb ( NpgsqlDataReader reader, int index ) => reader.GetDataTypeName ( index ) == "jsonb";
 
-        private async Task<IEnumerable<T>> ExecuteWithResultAsCollectionAsync<T> ( string command, IDictionary<string, object> parameters ) where T : new() {
+        private async Task<IEnumerable<T>> ExecuteWithResultAsCollectionAsync<T> ( string command, IDictionary<string, object> parameters, CancellationToken cancellationToken = default ) where T : new() {
             var connection = await GetConnectionAsync ();
 
             m_logger.LogInformation ( $"SQL: {command}\n{string.Join ( ", ", parameters.Select ( a => a.Key + "=" + a.Value ) )}" );
@@ -244,9 +244,9 @@ namespace ONielCommon.Storage {
             await using var cmd = new NpgsqlCommand ( command, connection );
             FillParameters ( parameters, cmd );
 
-            using var reader = await cmd.ExecuteReaderAsync ();
+            using var reader = await cmd.ExecuteReaderAsync ( cancellationToken );
             var result = new List<T> ();
-            while ( await reader.ReadAsync () ) {
+            while ( await reader.ReadAsync ( cancellationToken ) ) {
                 var item = new T ();
                 var fieldsCount = reader.FieldCount;
                 for ( int i = 0; i < fieldsCount; i++ ) {
@@ -370,7 +370,7 @@ namespace ONielCommon.Storage {
             await CommitTransation ();
         }
 
-        public async Task<IEnumerable<T>> GetAsync<T> ( Query query ) where T : new() {
+        public async Task<IEnumerable<T>> GetAsync<T> ( Query query, CancellationToken cancellationToken = default ) where T : new() {
             if ( query == null ) throw new ArgumentNullException ( nameof ( query ) );
 
             // if table not specified, we try get table from class model attributes or it name itself
@@ -380,7 +380,7 @@ namespace ONielCommon.Storage {
             }
 
             var compiledQuery = m_compilerWithoutBraces.Compile ( query );
-            return await ExecuteWithResultAsCollectionAsync<T> ( compiledQuery.Sql, compiledQuery.NamedBindings );
+            return await ExecuteWithResultAsCollectionAsync<T> ( compiledQuery.Sql, compiledQuery.NamedBindings, cancellationToken );
         }
 
         public IEnumerable<T> Get<T> ( Query query ) where T : new() {
@@ -390,8 +390,8 @@ namespace ONielCommon.Storage {
             return ExecuteWithResultAsCollection<T> ( compiledQuery.Sql, compiledQuery.NamedBindings );
         }
 
-        public async Task<T?> GetSingleAsync<T> ( Query query ) where T : new() {
-            var result = await GetAsync<T> ( query.Limit ( 1 ) );
+        public async Task<T?> GetSingleAsync<T> ( Query query, CancellationToken cancellationToken = default ) where T : new() {
+            var result = await GetAsync<T> ( query.Limit ( 1 ), cancellationToken );
             return result.FirstOrDefault ();
         }
 

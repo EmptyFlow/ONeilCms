@@ -17,7 +17,7 @@ namespace ONielCms.Handlers {
                 var routePair = m_routeHandler?.GetRoute ( path );
                 if ( routePair != null ) {
                     var route = routePair.Value.routeId;
-                    var response = await routeResponseService.GetResponse ( path, route.Id, m_routeHandler?.Version ?? "" );
+                    var response = await routeResponseService.GetResponse ( path, route.Id, m_routeHandler?.Version ?? "", httpContext.RequestAborted );
 
                     if ( route.DownloadAsFile && !string.IsNullOrEmpty ( route.DownloadFileName ) ) {
                         return Results.File ( response.Item1, route.ContentType, fileDownloadName: route.DownloadFileName );

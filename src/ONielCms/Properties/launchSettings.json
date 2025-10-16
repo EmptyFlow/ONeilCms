@@ -2,23 +2,14 @@
   "profiles": {
     "http": {
       "commandName": "Project",
-      "commandLineArgs": "import-file -p=test.import",
-      "launchBrowser": true,
-      "launchUrl": "site/pizda",
+      "commandLineArgs": "import-folder --path=C:/work/Experiments/testwebsite --version=1",
+      "launchUrl": "/",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "http://localhost:5155"
-    },
-    "Container (Dockerfile)": {
-      "commandName": "Docker",
-      "launchBrowser": true,
-      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/simple/route",
-      "environmentVariables": {
-        "ASPNETCORE_HTTP_PORTS": "8080"
-      },
-      "publishAllPorts": true
+      "applicationUrl": "http://localhost:5155",
+      "hotReloadEnabled": true
     }
   },
   "$schema": "http://json.schemastore.org/launchsettings.json"

@@ -28,8 +28,9 @@ namespace ONielCms.Services.DatabaseLogic {
 
             var routeResources = await _storageContext.GetAsync<RouteResource> (
                 new Query ()
+                    .Join( "resourceversion", "resourceversion.resourceid", "routeresource.resourceid" )
                     .Where ( "routeid", route.Id )
-                    .Where ( "version", edition.Version )
+                    .Where ( "resourceversion.version", edition.Version )
                     .OrderBy ( "renderorder" )
             );
             if ( !routeResources.Any () ) return ([], 204);
@@ -48,7 +49,7 @@ namespace ONielCms.Services.DatabaseLogic {
             return (response.ToArray (), 200);
         }
 
-        public async Task<(byte[], int)> GetResponse ( string path, Guid routeId, string version ) {
+        public async Task<(byte[], int)> GetResponse ( string path, Guid routeId, string version, CancellationToken cancellationToken = default ) {
             var routeResources = await _storageContext.GetAsync<RouteResource> (
             new Query ()
                     .Where ( "routeid", routeId )
@@ -59,7 +60,8 @@ namespace ONielCms.Services.DatabaseLogic {
 
             var resources = await _storageContext.GetAsync<Resource> (
                 new Query ()
-                    .Where ( "id", routeResources.Select ( a => a.ResourceId ) )
+                    .Where ( "id", routeResources.Select ( a => a.ResourceId ) ),
+                cancellationToken
             );
 
             var response = new MemoryStream ();
