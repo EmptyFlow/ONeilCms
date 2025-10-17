@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.StaticFiles;
-using ONielCms.Models;
+﻿using ONielCms.Models;
 using ONielCommon.Entities;
 using ONielCommon.Storage;
 using SqlKata;
@@ -135,7 +134,7 @@ namespace ONielCms.Services.DatabaseLogic {
                         } else {
                             var routeModel = new RouteEntity {
                                 ContentType = route.ContentType,
-                                Method = GetMethodName ( route.Method ),
+                                Method = ImportRoutines.GetMethodName ( route.Method ),
                                 Path = route.Path,
                                 DownloadAsFile = route.DownloadAsFile,
                                 DownloadFileName = route.DownloadFileName,
@@ -162,15 +161,6 @@ namespace ONielCms.Services.DatabaseLogic {
                 }
            );
         }
-
-        private static string GetMethodName ( string method ) => method.ToLowerInvariant () switch {
-            "get" => "GET",
-            "post" => "POST",
-            "put" => "POST",
-            "delete" => "DELETE",
-            "patch" => "PATCH",
-            _ => throw new NotSupportedException ( $"Method {method} not supported!" )
-        };
 
         private static void ValidateModel ( ImportVersionModel model ) {
             if ( string.IsNullOrEmpty ( model.Data.Version ) ) throw new Exception ( "Model.Data.Version is null of empty!" );
@@ -229,33 +219,47 @@ namespace ONielCms.Services.DatabaseLogic {
                     var existsRoutes = ( await m_storageContext.GetAsync<RouteEntity> ( new Query ().Where ( "method", "GET" ) ) )
                         .ToDictionary ( a => a.Path );
 
-                    var resourcesHashes = ( await m_storageContext.GetAsync<ResourceWithoutContent> ( new Query ().Select ( ["id", "identifier", "contenthash"] ) ) )
-                        .ToDictionary ( a => a.Identifier );
+                    var resourcesHashes = (
+                        await m_storageContext.GetAsync<ResourceWithoutContent> (
+                            new Query ()
+                                .Join ( "resourceversion", "resourceversion.resourceid", "resource.id" )
+                                .Select ( ["resource.id", "resource.identifier", "resource.contenthash"] )
+                        )
+                    ).ToDictionary ( a => a.Identifier );
 
                     foreach ( var file in files ) {
                         var nameOfResource = file.FullName.Replace ( "\\", "/" ).Substring ( path.Length + 1 );
-                        var nameOfRoute = "/" + nameOfResource;
+                        var nameOfRoute = nameOfResource;
 
                         var bytes = File.ReadAllBytes ( file.FullName );
                         var hash = CalculateHash ( bytes );
 
+                        // if we have existing resource
                         if ( resourcesHashes.TryGetValue ( nameOfResource, out var existsResource ) ) {
-                            await m_storageContext.MakeNoResult<Resource> (
-                                new Query ()
-                                    .Where ( "id", existsResource.Id )
-                                    .AsUpdate ( new { content = bytes } )
-                            );
+                            // and if file hash not equal
+                            if ( existsResource.ContentHash != hash ) {
+                                // update only resource content and hash
+                                await m_storageContext.MakeNoResult<Resource> (
+                                    new Query ()
+                                        .Where ( "id", existsResource.Id )
+                                        .AsUpdate ( new { content = bytes, contenthash = hash } )
+                                );
+                            }
                             continue;
                         }
 
+                        // if we have route and don't have resource
                         if ( existsRoutes.TryGetValue ( nameOfRoute, out var existRoute ) ) {
+                            // create resource 
                             await SaveResource ( nameOfResource, bytes, hash, existRoute.Id, desiredVersion );
+                            // and appropriate version if it required
                             await SaveRouteVersion ( existRoute.Id, desiredVersion );
                             continue;
                         }
 
-                        var mimeType = GetMimeTypeForFileExtension ( nameOfResource );
-                        var isDownloadble = isDownloadbleFile ( mimeType );
+                        // create new route and all appropriate stuff
+                        var mimeType = ImportRoutines.GetMimeTypeForFileExtension ( nameOfResource );
+                        var isDownloadble = ImportRoutines.IsDownloadbleFile ( mimeType );
                         var newRoute = new RouteEntity {
                             Method = "GET",
                             ContentType = mimeType,
@@ -307,38 +311,6 @@ namespace ONielCms.Services.DatabaseLogic {
                 Version = version
             };
             await m_storageContext.AddOrUpdate ( resourceVersion );
-        }
-
-        private string GetMimeTypeForFileExtension ( string filePath ) {
-            const string DefaultContentType = "application/octet-stream";
-
-            var provider = new FileExtensionContentTypeProvider ();
-
-            if ( !provider.TryGetContentType ( filePath, out var contentType ) ) {
-                contentType = DefaultContentType;
-            }
-
-            return contentType;
-        }
-
-        private static bool isDownloadbleFile ( string mimeType ) {
-            switch ( mimeType.ToLowerInvariant () ) {
-                case "text/css":
-                case "text/html":
-                case "text/plain":
-                case "text/javascript":
-                case "text/markdown":
-                case "image/jpeg":
-                case "image/png":
-                case "image/gif":
-                case "image/svg+xml":
-                case "image/webp":
-                case "application/json":
-                case "application/xml":
-                    return false;
-            }
-
-            return true;
         }
 
     }

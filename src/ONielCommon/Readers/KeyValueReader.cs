@@ -10,13 +10,13 @@
             foreach ( var line in lines ) {
                 if ( !line.Contains ( " " ) ) continue;
 
-                var parts = line.Split ( " " );
-                if ( parts.Count () != 2 ) continue;
+                var span = line.AsSpan ();
+                var index = span.IndexOf ( " " );
 
-                var key = parts[0].Trim ();
-                var value = parts[1].Trim ();
+                var key = span.Slice ( 0, index );
+                var value = span.Slice ( index );
 
-                result.TryAdd ( key, value );
+                result.TryAdd ( key.ToString().Trim(), value.ToString () );
             }
 
             return result;

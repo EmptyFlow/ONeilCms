@@ -30,7 +30,8 @@ namespace ONielCms.Handlers {
                 if ( routePair == null ) return Results.NotFound ();
 
                 return Results.Ok ();
-            } catch {
+            } catch(Exception ex) {
+                Console.WriteLine ( ex.ToString () );
                 return Results.Problem ( statusCode: 500 );
             }
         }

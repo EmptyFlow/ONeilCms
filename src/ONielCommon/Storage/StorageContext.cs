@@ -26,7 +26,7 @@ namespace ONielCommon.Storage {
     /// <summary>
     /// Storage context for postgres database.
     /// </summary>
-    public class StorageContext : IStorageContext {
+    public class StorageContext : IStorageContext, IDisposable {
 
         private static readonly PostgresCompilerWithoutBraces m_compilerWithoutBraces = new ();
 
@@ -48,10 +48,43 @@ namespace ONielCommon.Storage {
             m_connectionString = m_configurationService.DatabaseConnectionString ();
         }
 
-        private static async Task OpenConnection ( NpgsqlConnection connection ) {
+        private static async Task OpenConnectionAsync ( NpgsqlConnection connection ) {
             await connection.OpenAsync ();
 
             if ( connection.FullState != ConnectionState.Open ) throw new Exception ( "Can't connecting to postgres database." );
+        }
+
+        private static void OpenConnection ( NpgsqlConnection connection ) {
+            connection.Open ();
+
+            if ( connection.FullState != ConnectionState.Open ) throw new Exception ( "Can't connecting to postgres database." );
+        }
+
+        private async Task<NpgsqlConnection> GetConnectionAsync () {
+            if ( m_connection == null ) {
+                m_connection = new NpgsqlConnection ( m_connectionString );
+                await OpenConnectionAsync ( m_connection );
+                return m_connection;
+            }
+
+            return m_connection;
+        }
+
+        private NpgsqlConnection GetConnection () {
+            if ( m_connection == null ) {
+                m_connection = new NpgsqlConnection ( m_connectionString );
+                OpenConnection ( m_connection );
+                return m_connection;
+            }
+
+            return m_connection;
+        }
+
+        private void CloseConnection () {
+            if ( m_connection == null ) return;
+
+            m_connection.Close ();
+            m_connection.Dispose ();
         }
 
         private static void FillParameters ( IDictionary<string, object> parameters, NpgsqlCommand cmd ) {
@@ -151,31 +184,6 @@ namespace ONielCommon.Storage {
             if ( propertyValue == null ) throw new ArgumentException ( $"Method Get for Id property returned null value which is incorrect for {item.GetType ().Name}!" );
 
             return (Guid) propertyValue;
-        }
-
-        private async Task<NpgsqlConnection> GetConnectionAsync () {
-            NpgsqlConnection? connection;
-            if ( m_connection == null ) {
-                connection = new NpgsqlConnection ( m_connectionString );
-                await OpenConnection ( connection );
-            } else {
-                connection = m_connection;
-            }
-
-            return connection;
-        }
-
-        private NpgsqlConnection GetConnection () {
-            NpgsqlConnection? connection;
-            if ( m_connection == null ) {
-                connection = new NpgsqlConnection ( m_connectionString );
-                connection.Open ();
-                if ( connection.FullState != ConnectionState.Open ) throw new Exception ( "Can't connecting to postgres database." );
-            } else {
-                connection = m_connection;
-            }
-
-            return connection;
         }
 
         public async Task ExecuteNonResult ( string command, IDictionary<string, object> parameters ) {
@@ -288,12 +296,11 @@ namespace ONielCommon.Storage {
 
 
         private async Task BeginTransaction ( bool groupedTransaction = false ) {
-            if ( !( m_connection == null && m_transaction == null ) ) return; // if transaction already started not need make new transaction
+            if ( m_transaction != null ) return; // if transaction already started not need make new transaction
 
-            m_connection = new NpgsqlConnection ( m_connectionString );
-            await OpenConnection ( m_connection );
+            var connection = await GetConnectionAsync ();
 
-            m_transaction = await m_connection.BeginTransactionAsync ();
+            m_transaction = await connection.BeginTransactionAsync ();
             m_groupedTransaction = groupedTransaction;
         }
 
@@ -441,6 +448,8 @@ namespace ONielCommon.Storage {
 
             await ExecuteNonResult ( compiledQuery.Sql, compiledQuery.NamedBindings );
         }
+
+        public void Dispose () => CloseConnection ();
 
     }
 
