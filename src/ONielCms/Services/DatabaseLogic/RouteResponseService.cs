@@ -49,26 +49,31 @@ namespace ONielCms.Services.DatabaseLogic {
             return (response.ToArray (), 200);
         }
 
+        private async IAsyncEnumerable<Resource> CombineContent ( Stream stream, IEnumerable<Resource> resources ) {
+            foreach ( var resource in resources ) {
+                await stream.WriteAsync ( resource.Content );
+                yield return resource;
+            }
+        }
+
         public async Task<(byte[], int)> GetResponse ( string path, Guid routeId, string version, CancellationToken cancellationToken = default ) {
-            var routeResources = await _storageContext.GetAsync<RouteResource> (
+            var resources = await _storageContext.GetAsync<Resource> (
                 new Query ()
+                    .Join ( "routeresource", "routeresource.resourceid", "resource.id" )
                     .Join ( "resourceversion", "resourceversion.resourceid", "routeresource.resourceid" )
                     .Where ( "routeid", routeId )
                     .Where ( "version", version )
-                    .Select( "routeresource.*" )
-                    .OrderBy ( "renderorder" )
-            );
-            if ( !routeResources.Any () ) return ([], 204);
-
-            var resources = await _storageContext.GetAsync<Resource> (
-                new Query ()
-                    .Where ( "id", routeResources.Select ( a => a.ResourceId ) ),
+                    .Select ( "resource.*" )
+                    .OrderBy ( "routeresource.renderorder" ),
                 cancellationToken
             );
+            if ( !resources.Any () ) return ([], 204);
 
             var response = new MemoryStream ();
-            foreach ( var resource in resources ) {
-                await response.WriteAsync ( resource.Content );
+            await foreach ( var resource in CombineContent ( response, resources ).WithCancellation ( cancellationToken ) ) {
+#if DEBUG
+                Console.WriteLine ( "Content for resource " + resource.Id );
+#endif
             }
             response.Position = 0;
 
