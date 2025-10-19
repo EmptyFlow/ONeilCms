@@ -4,20 +4,21 @@ using System.Text;
 
 namespace ONielCms.Handlers {
 
-    public static class SiteDeleteHandler {
+    public static class SiteWithoutBodyHandler {
 
         public static async Task<IResult> Handler (
             HttpContext httpContext,
             string path,
             IRouteResponseService routeResponseService,
-            IRouteService routeService ) {
+            IRouteService routeService,
+            string method) {
             try {
-                if ( !m_loaded ) await LoadRoutes ( routeService );
+                if ( !m_loaded ) await LoadRoutes ( routeService, method );
 
                 var routePair = m_routeHandler?.GetRoute ( path );
                 if ( routePair != null ) {
                     var route = routePair.Value.routeId;
-                    var response = await routeResponseService.GetResponse ( path, route.Id, m_routeHandler?.Version ?? "" );
+                    var response = await routeResponseService.GetResponse ( path, route.Id, m_routeHandler?.Version ?? "", httpContext.RequestAborted );
 
                     if ( route.DownloadAsFile && !string.IsNullOrEmpty ( route.DownloadFileName ) ) {
                         return Results.File ( response.Item1, route.ContentType, fileDownloadName: route.DownloadFileName );
@@ -30,8 +31,13 @@ namespace ONielCms.Handlers {
                 if ( routePair == null ) return Results.NotFound ();
 
                 return Results.Ok ();
+#if DEBUG
+            } catch ( Exception ex ) {
+                Console.WriteLine ( ex.ToString () );
+#else
             } catch {
-                return Results.Problem ( statusCode: 500 );
+#endif
+                return Results.StatusCode ( 500 );
             }
         }
 
@@ -39,8 +45,8 @@ namespace ONielCms.Handlers {
 
         private static bool m_loaded = false;
 
-        public static async Task LoadRoutes ( IRouteService routeService ) {
-            var (routes, currentVersion) = await routeService.GetAllRoutesInCurrentVersion ( "DELETE" );
+        public static async Task LoadRoutes ( IRouteService routeService, string method ) {
+            var (routes, currentVersion) = await routeService.GetAllRoutesInCurrentVersion ( method );
 
             m_routeHandler = new RouteHandler ();
             m_routeHandler.FillRoutesCache ( currentVersion, routes );
