@@ -197,7 +197,6 @@ namespace ONielCommon.Storage {
             await cmd.ExecuteNonQueryAsync ();
         }
 
-
         private async Task<Guid> ExecuteWithSingleResultAsGuid ( string command, IDictionary<string, object> parameters ) {
             var connection = await GetConnectionAsync ();
 
