@@ -1,5 +1,6 @@
 ﻿using ONielCms.Services.DatabaseLogic;
 using ONielCommon.Storage.EntityServices;
+using System.Collections.Concurrent;
 using System.Text;
 
 namespace ONielCms.Handlers {
@@ -11,14 +12,15 @@ namespace ONielCms.Handlers {
             string path,
             IRouteResponseService routeResponseService,
             IRouteService routeService,
-            string method) {
+            string method ) {
             try {
-                if ( !m_loaded ) await LoadRoutes ( routeService, method );
+                if ( !m_routeHandler.ContainsKey ( method ) ) await LoadRoutes ( routeService, method );
 
-                var routePair = m_routeHandler?.GetRoute ( path );
+                var routeHandler = m_routeHandler [ method ];
+                var routePair = routeHandler.GetRoute ( path );
                 if ( routePair != null ) {
                     var route = routePair.Value.routeId;
-                    var response = await routeResponseService.GetResponse ( path, route.Id, m_routeHandler?.Version ?? "", httpContext.RequestAborted );
+                    var response = await routeResponseService.GetResponse ( path, route.Id, routeHandler.Version ?? "", httpContext.RequestAborted );
 
                     if ( route.DownloadAsFile && !string.IsNullOrEmpty ( route.DownloadFileName ) ) {
                         return Results.File ( response.Item1, route.ContentType, fileDownloadName: route.DownloadFileName );
@@ -41,17 +43,15 @@ namespace ONielCms.Handlers {
             }
         }
 
-        private static RouteHandler? m_routeHandler = null;
-
-        private static bool m_loaded = false;
+        private static ConcurrentDictionary<string, RouteHandler> m_routeHandler = new ConcurrentDictionary<string, RouteHandler> ();
 
         public static async Task LoadRoutes ( IRouteService routeService, string method ) {
             var (routes, currentVersion) = await routeService.GetAllRoutesInCurrentVersion ( method );
 
-            m_routeHandler = new RouteHandler ();
-            m_routeHandler.FillRoutesCache ( currentVersion, routes );
+            var handler = new RouteHandler ();
+            handler.FillRoutesCache ( currentVersion, routes );
 
-            m_loaded = true;
+            if ( !m_routeHandler.TryAdd ( method, handler ) ) m_routeHandler.TryAdd ( method, handler );
         }
 
     }
