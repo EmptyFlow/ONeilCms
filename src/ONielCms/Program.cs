@@ -29,7 +29,7 @@ app.MapGet ( "/", async (
     HttpContext context,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SiteWithoutBodyHandler.Handler ( context, "/", routeResponseService, routeService, "GET" );
+        return await SiteBodyHandler.Handler ( context, "/", routeResponseService, routeService, "GET" );
     }
 );
 app.MapGet ( "/{*path}", async (
@@ -37,7 +37,7 @@ app.MapGet ( "/{*path}", async (
     [FromRoute] string path,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SiteWithoutBodyHandler.Handler ( context, path, routeResponseService, routeService, "GET" );
+        return await SiteBodyHandler.Handler ( context, path, routeResponseService, routeService, "GET" );
     }
 );
 
@@ -47,7 +47,7 @@ app.MapPost ( "/", async (
     HttpContext context,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SitePostHandler.Handler ( context, "/", routeResponseService, routeService );
+        return await SiteBodyHandler.Handler ( context, "/", routeResponseService, routeService, "POST" );
     }
 );
 app.MapPost ( "/{*path}", async (
@@ -55,7 +55,7 @@ app.MapPost ( "/{*path}", async (
     [FromRoute] string path,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SitePostHandler.Handler ( context, path, routeResponseService, routeService );
+        return await SiteBodyHandler.Handler ( context, path, routeResponseService, routeService, "POST" );
     }
 );
 
@@ -65,7 +65,7 @@ app.MapPut ( "/", async (
     HttpContext context,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SitePutHandler.Handler ( context, "/", routeResponseService, routeService );
+        return await SiteBodyHandler.Handler ( context, "/", routeResponseService, routeService, "PUT" );
     }
 );
 app.MapPut ( "/{*path}", async (
@@ -73,7 +73,7 @@ app.MapPut ( "/{*path}", async (
     [FromRoute] string path,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SitePutHandler.Handler ( context, path, routeResponseService, routeService );
+        return await SiteBodyHandler.Handler ( context, path, routeResponseService, routeService, "PUT" );
     }
 );
 
@@ -83,7 +83,7 @@ app.MapDelete ( "/", async (
     HttpContext context,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SiteWithoutBodyHandler.Handler ( context, "/", routeResponseService, routeService, "DELETE" );
+        return await SiteBodyHandler.Handler ( context, "/", routeResponseService, routeService, "DELETE" );
     }
 );
 app.MapDelete ( "/{*path}", async (
@@ -91,7 +91,7 @@ app.MapDelete ( "/{*path}", async (
     [FromRoute] string path,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SiteWithoutBodyHandler.Handler ( context, path, routeResponseService, routeService, "DELETE" );
+        return await SiteBodyHandler.Handler ( context, path, routeResponseService, routeService, "DELETE" );
     }
 );
 

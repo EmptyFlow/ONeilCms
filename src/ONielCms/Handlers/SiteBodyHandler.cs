@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ONielCms.Handlers {
 
-    public static class SiteWithoutBodyHandler {
+    public static class SiteBodyHandler {
 
         public static async Task<IResult> Handler (
             HttpContext httpContext,
