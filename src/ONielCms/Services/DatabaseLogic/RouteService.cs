@@ -1,10 +1,9 @@
 ﻿using ONielCommon.Entities;
 using ONielCommon.Storage;
-using ONielCommon.Storage.EntityServices;
 using SqlKata;
 using OneilRoute = ONielCommon.Entities.SiteRoute;
 
-namespace ONielCms.Services {
+namespace ONielCms.Services.DatabaseLogic {
 
     public class RouteService : IRouteService {
 
@@ -33,6 +32,23 @@ namespace ONielCms.Services {
                 new Query ()
                     .Join ( "routeversion", "route.id", "routeversion.routeid" )
                     .Where ( "route.method", method )
+                    .Where ( "routeversion.version", edition.Version )
+                    .SelectRaw ( "route.*" )
+            );
+
+            return (result, edition.Version);
+        }
+
+        public async Task<(IEnumerable<OneilRoute>, string)> GetAllRoutesInCurrentVersion () {
+            var edition = await m_storageContext.GetSingleAsync<Edition> (
+                new Query ()
+                    .OrderByDesc ( "created" )
+            );
+            if ( edition == null ) return (Enumerable.Empty<OneilRoute> (), "");
+
+            var result = await m_storageContext.GetAsync<OneilRoute> (
+                new Query ()
+                    .Join ( "routeversion", "route.id", "routeversion.routeid" )
                     .Where ( "routeversion.version", edition.Version )
                     .SelectRaw ( "route.*" )
             );

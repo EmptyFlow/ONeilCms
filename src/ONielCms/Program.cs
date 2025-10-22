@@ -4,7 +4,6 @@ using ONielCms.Handlers;
 using ONielCms.Services;
 using ONielCms.Services.DatabaseLogic;
 using ONielCommon.Storage;
-using ONielCommon.Storage.EntityServices;
 
 ConfigurationService.Initialize ();
 var storageService = new StorageContext ( new ConsoleStorageLogger (), new ConfigurationService () );
@@ -18,6 +17,9 @@ var builder = WebApplication.CreateBuilder ( Enumerable.Empty<string> ().ToArray
 Dependencies.Resolve ( builder.Services );
 
 var app = builder.Build ();
+
+var configurationService = app.Services.GetService<IConfigurationService> ();
+if ( configurationService != null ) await SiteBodyHandler.LoadAllRoutesInCurrentVersion ( configurationService );
 
 //app.Urls.Add("http://localhost:4000");
 

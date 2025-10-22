@@ -1,11 +1,14 @@
 ﻿using ONielCms.Services.DatabaseLogic;
-using ONielCommon.Storage.EntityServices;
+using ONielCommon.Entities;
+using ONielCommon.Storage;
 using System.Collections.Concurrent;
 using System.Text;
 
 namespace ONielCms.Handlers {
 
     public static class SiteBodyHandler {
+
+        private static ConcurrentDictionary<string, RouteHandler> m_routeHandler = new ConcurrentDictionary<string, RouteHandler> ();
 
         public static async Task<IResult> Handler (
             HttpContext httpContext,
@@ -14,9 +17,7 @@ namespace ONielCms.Handlers {
             IRouteService routeService,
             string method ) {
             try {
-                if ( !m_routeHandler.ContainsKey ( method ) ) await LoadRoutes ( routeService, method );
-
-                var routeHandler = m_routeHandler [ method ];
+                var routeHandler = m_routeHandler[method];
                 var routePair = routeHandler.GetRoute ( path );
                 if ( routePair != null ) {
                     var route = routePair.Value.routeId;
@@ -43,15 +44,25 @@ namespace ONielCms.Handlers {
             }
         }
 
-        private static ConcurrentDictionary<string, RouteHandler> m_routeHandler = new ConcurrentDictionary<string, RouteHandler> ();
-
-        public static async Task LoadRoutes ( IRouteService routeService, string method ) {
-            var (routes, currentVersion) = await routeService.GetAllRoutesInCurrentVersion ( method );
+        private static void FillHandler ( string version, IEnumerable<SiteRoute> routes ) {
+            if ( !routes.Any() ) return;
 
             var handler = new RouteHandler ();
-            handler.FillRoutesCache ( currentVersion, routes );
-
+            handler.FillRoutesCache ( version, routes );
+            var method = routes.First ().Method;
             if ( !m_routeHandler.TryAdd ( method, handler ) ) m_routeHandler.TryAdd ( method, handler );
+        }
+
+        public static async Task LoadAllRoutesInCurrentVersion ( IConfigurationService configurationService ) {
+            var storageContext = new StorageContext ( new ConsoleStorageLogger (), configurationService );
+            var routeService = new RouteService ( storageContext );
+
+            var (routes, version) = await routeService.GetAllRoutesInCurrentVersion ();
+
+            FillHandler ( version, routes.Where ( a => a.Method == "GET" ) );
+            FillHandler ( version, routes.Where ( a => a.Method == "POST" ) );
+            FillHandler ( version, routes.Where ( a => a.Method == "PUT" ) );
+            FillHandler ( version, routes.Where ( a => a.Method == "DELETE" ) );
         }
 
     }
