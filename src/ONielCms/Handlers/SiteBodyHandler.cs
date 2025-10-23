@@ -1,14 +1,13 @@
 ﻿using ONielCms.Services.DatabaseLogic;
 using ONielCommon.Entities;
 using ONielCommon.Storage;
-using System.Collections.Concurrent;
 using System.Text;
 
 namespace ONielCms.Handlers {
 
     public static class SiteBodyHandler {
 
-        private static ConcurrentDictionary<string, RouteHandler> m_routeHandler = new ConcurrentDictionary<string, RouteHandler> ();
+        private static Dictionary<string, RouteHandler> m_routeHandler = new Dictionary<string, RouteHandler> ();
 
         public static async Task<IResult> Handler (
             HttpContext httpContext,
@@ -44,25 +43,28 @@ namespace ONielCms.Handlers {
             }
         }
 
-        private static void FillHandler ( string version, IEnumerable<SiteRoute> routes ) {
+        private static void FillHandler ( string version, IEnumerable<SiteRoute> routes, Dictionary<string, RouteHandler> handlerDictionary ) {
             if ( !routes.Any () ) return;
 
             var handler = new RouteHandler ();
             handler.FillRoutesCache ( version, routes );
             var method = routes.First ().Method;
-            if ( !m_routeHandler.TryAdd ( method, handler ) ) m_routeHandler.TryAdd ( method, handler );
+
+            handlerDictionary.Add ( method, handler );
         }
 
         public static async Task LoadAllRoutesInCurrentVersion ( IConfigurationService configurationService ) {
+            Dictionary<string, RouteHandler> handlers = new ();
             var storageContext = new StorageContext ( new ConsoleStorageLogger (), configurationService );
             var routeService = new RouteService ( storageContext );
 
             var (routes, version) = await routeService.GetAllRoutesInCurrentVersion ();
 
             foreach ( var group in routes.GroupBy ( a => a.Method ) ) {
-                FillHandler ( version, group );
+                FillHandler ( version, group, handlers );
             }
 
+            m_routeHandler = handlers;
         }
 
     }
