@@ -45,7 +45,7 @@ namespace ONielCms.Handlers {
         }
 
         private static void FillHandler ( string version, IEnumerable<SiteRoute> routes ) {
-            if ( !routes.Any() ) return;
+            if ( !routes.Any () ) return;
 
             var handler = new RouteHandler ();
             handler.FillRoutesCache ( version, routes );
@@ -59,10 +59,10 @@ namespace ONielCms.Handlers {
 
             var (routes, version) = await routeService.GetAllRoutesInCurrentVersion ();
 
-            FillHandler ( version, routes.Where ( a => a.Method == "GET" ) );
-            FillHandler ( version, routes.Where ( a => a.Method == "POST" ) );
-            FillHandler ( version, routes.Where ( a => a.Method == "PUT" ) );
-            FillHandler ( version, routes.Where ( a => a.Method == "DELETE" ) );
+            foreach ( var group in routes.GroupBy ( a => a.Method ) ) {
+                FillHandler ( version, group );
+            }
+
         }
 
     }

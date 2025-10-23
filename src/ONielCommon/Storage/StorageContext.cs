@@ -21,8 +21,6 @@ namespace ONielCommon.Storage {
 
     }
 
-    public record JsonData ( string Json );
-
     /// <summary>
     /// Storage context for postgres database.
     /// </summary>
@@ -90,14 +88,6 @@ namespace ONielCommon.Storage {
         private static void FillParameters ( IDictionary<string, object> parameters, NpgsqlCommand cmd ) {
             if ( parameters != null ) {
                 foreach ( var parameter in parameters ) {
-                    if ( parameter.Value is JsonData ) {
-                        cmd.Parameters.AddWithValue (
-                            parameter.Key,
-                            NpgsqlDbType.Jsonb,
-                            ( (JsonData) parameter.Value ).Json
-                        );
-                        continue;
-                    }
                     cmd.Parameters.AddWithValue (
                         parameter.Key,
                         parameter.Value is Enum ? Convert.ToInt32 ( parameter.Value ) : parameter.Value
@@ -119,19 +109,7 @@ namespace ONielCommon.Storage {
                 if ( value == null ) {
                     values[key] = DBNull.Value;
                 } else {
-                    if ( property.PropertyType?.IsClass == true && property.PropertyType?.FullName?.StartsWith ( "CrashNest." ) == true ) {
-                        values[key] = new JsonData (
-                            JsonSerializer.Serialize (
-                                value,
-                                property.PropertyType,
-                                new JsonSerializerOptions {
-                                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                                }
-                            )
-                        );
-                    } else {
-                        values[key] = value is Enum ? Convert.ToInt32 ( value ) : value;
-                    }
+                    values[key] = value is Enum ? Convert.ToInt32 ( value ) : value;
                 }
                 iterator++;
             }
@@ -215,7 +193,7 @@ namespace ONielCommon.Storage {
             return result;
         }
 
-        private static void SetPropertyInItem<T> ( T item, ref string property, ref object? value, bool isJsonb = false ) {
+        private static void SetPropertyInItem<T> ( T item, ref string property, ref object? value ) {
             if ( item == null ) throw new ArgumentNullException ( nameof ( item ) );
 
             var valueProperty = item.GetType ().GetProperty ( property, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public );
@@ -224,24 +202,11 @@ namespace ONielCommon.Storage {
             if ( value == DBNull.Value ) value = null;
 
             try {
-                if ( isJsonb ) {
-                    var json = value == null ? "null" : ( value.ToString () ?? "null" );
-                    var jsonObject = JsonSerializer.Deserialize (
-                        json,
-                        valueProperty.PropertyType,
-                        new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
-                    );
-                    valueProperty.GetSetMethod ()?.Invoke ( item, new object?[] { jsonObject } );
-                    return;
-                }
-
                 valueProperty.GetSetMethod ()?.Invoke ( item, new object?[] { value } );
             } catch {
                 throw new ArgumentException ( $"Property {property} doesn't match types with value {value}!" );
             }
         }
-
-        private static bool IsJsonb ( NpgsqlDataReader reader, int index ) => reader.GetDataTypeName ( index ) == "jsonb";
 
         private async Task<IEnumerable<T>> ExecuteWithResultAsCollectionAsync<T> ( string command, IDictionary<string, object> parameters, CancellationToken cancellationToken = default ) where T : new() {
             var connection = await GetConnectionAsync ();
@@ -259,7 +224,7 @@ namespace ONielCommon.Storage {
                 for ( int i = 0; i < fieldsCount; i++ ) {
                     var fieldName = reader.GetName ( i );
                     var value = reader.GetValue ( i );
-                    SetPropertyInItem ( item, ref fieldName, ref value, IsJsonb ( reader, i ) );
+                    SetPropertyInItem ( item, ref fieldName, ref value );
                 }
                 result.Add ( item );
             }
@@ -284,7 +249,7 @@ namespace ONielCommon.Storage {
                 for ( int i = 0; i < fieldsCount; i++ ) {
                     var fieldName = reader.GetName ( i );
                     var value = reader.GetValue ( i );
-                    SetPropertyInItem ( item, ref fieldName, ref value, IsJsonb ( reader, i ) );
+                    SetPropertyInItem ( item, ref fieldName, ref value );
                 }
                 result.Add ( item );
             }
