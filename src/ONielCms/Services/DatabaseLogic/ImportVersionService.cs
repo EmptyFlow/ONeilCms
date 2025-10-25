@@ -87,7 +87,6 @@ namespace ONielCms.Services.DatabaseLogic {
                                 Version = model.Data.Version
                             };
                             await m_storageContext.AddOrUpdate ( resourceVersion );
-
                         } else {
                             // if resource not exists need to create it
                             var resourceModel = new Resource {
