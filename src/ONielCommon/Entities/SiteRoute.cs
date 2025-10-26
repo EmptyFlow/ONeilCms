@@ -20,6 +20,8 @@ namespace ONielCommon.Entities {
 
         public string DownloadFileName { get; set; } = "";
 
+        public string Processors { get; set; } = "";
+
     }
 
 }

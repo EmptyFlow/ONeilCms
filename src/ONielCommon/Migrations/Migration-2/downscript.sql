@@ -1,1 +1,1 @@
-ALTER TABLE route DROP COLUMN processes text;
+ALTER TABLE route DROP COLUMN processors text;

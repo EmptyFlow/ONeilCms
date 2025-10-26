@@ -1,1 +1,1 @@
-ALTER TABLE route ADD COLUMN processes text;
+ALTER TABLE route ADD COLUMN processors text;
