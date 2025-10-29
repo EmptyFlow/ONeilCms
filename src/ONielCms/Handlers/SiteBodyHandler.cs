@@ -27,7 +27,7 @@ namespace ONielCms.Handlers {
                     } else {
                         var content = Encoding.UTF8.GetString ( response.Item1 );
 
-                        if ( !string.IsNullOrEmpty ( route.Processors ) ) content = await RunProcesors ( route.Processors, content );
+                        if ( !string.IsNullOrEmpty ( route.Processors ) ) content = await RunProcesors ( route.Processors, content, httpContext.RequestAborted );
 
                         return Results.Content ( content, route.ContentType, Encoding.UTF8 );
                     }
@@ -56,9 +56,9 @@ namespace ONielCms.Handlers {
             handlerDictionary.Add ( method, handler );
         }
 
-        private static Dictionary<string, Func<string, Task<string>>> m_textContent = new ();
+        private static Dictionary<string, Func<string, CancellationToken, Task<string>>> m_textContent = new ();
 
-        private static async Task<string> RunProcesors ( string processors, string content ) {
+        private static async Task<string> RunProcesors ( string processors, string content, CancellationToken cancellationToken ) {
             var processorsList = processors
                 .Split ( "," )
                 .Select ( a => a.Trim () )
@@ -68,7 +68,7 @@ namespace ONielCms.Handlers {
 
             foreach ( var processor in processorsList ) {
                 if ( m_textContent.TryGetValue ( processor, out var callback ) ) {
-                    result = await callback ( content );
+                    result = await callback ( content, cancellationToken );
                 }
             }
 
@@ -94,7 +94,7 @@ namespace ONielCms.Handlers {
         /// </summary>
         /// <param name="processor">Processor name.</param>
         /// <param name="callback">CAllback.</param>
-        public static void AddTextProcessor ( string processor, Func<string, Task<string>> callback ) {
+        public static void AddTextProcessor ( string processor, Func<string, CancellationToken, Task<string>> callback ) {
             if ( m_textContent.ContainsKey ( processor ) ) throw new Exception ( $"Processor with name {processor} already added!" );
 
             m_textContent.Add ( processor, callback );
