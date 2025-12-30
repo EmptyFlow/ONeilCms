@@ -1,5 +1,7 @@
-﻿using ONielCms.Services.DatabaseLogic;
+﻿using Microsoft.Extensions.Caching.Memory;
+using ONielCms.Services.DatabaseLogic;
 using ONielCommon.Entities;
+using ONielCommon.Exceptions;
 using ONielCommon.Storage;
 using System.Text;
 
@@ -14,7 +16,8 @@ namespace ONielCms.Handlers {
             string path,
             IRouteResponseService routeResponseService,
             IRouteService routeService,
-            string method ) {
+            string method,
+            IMemoryCache cache ) {
             try {
                 var routeHandler = m_routeHandler[method];
                 var routePair = routeHandler.GetRoute ( path );
@@ -27,7 +30,7 @@ namespace ONielCms.Handlers {
                     } else {
                         var content = Encoding.UTF8.GetString ( response.Item1 );
 
-                        if ( !string.IsNullOrEmpty ( route.Processors ) ) content = await RunProcesors ( route.Processors, content, httpContext.RequestAborted );
+                        if ( !string.IsNullOrEmpty ( route.Processors ) ) content = await RunProcesors ( route.Processors, content, httpContext, cache );
 
                         return Results.Content ( content, route.ContentType, Encoding.UTF8 );
                     }
@@ -36,6 +39,8 @@ namespace ONielCms.Handlers {
                 if ( routePair == null ) return Results.NotFound ();
 
                 return Results.Ok ();
+            } catch ( StatusCodeException statusCodeException ) {
+                return Results.StatusCode ( statusCodeException.StatusCode );
 #if DEBUG
             } catch ( Exception ex ) {
                 Console.WriteLine ( ex.ToString () );
@@ -56,9 +61,9 @@ namespace ONielCms.Handlers {
             handlerDictionary.Add ( method, handler );
         }
 
-        private static Dictionary<string, Func<string, CancellationToken, Task<string>>> m_textContent = new ();
+        private static Dictionary<string, Func<string, HttpContext, IMemoryCache, Task<string>>> m_textProcessors = new ();
 
-        private static async Task<string> RunProcesors ( string processors, string content, CancellationToken cancellationToken ) {
+        private static async Task<string> RunProcesors ( string processors, string content, HttpContext context, IMemoryCache memoryCache ) {
             var processorsList = processors
                 .Split ( "," )
                 .Select ( a => a.Trim () )
@@ -67,8 +72,8 @@ namespace ONielCms.Handlers {
             var result = content;
 
             foreach ( var processor in processorsList ) {
-                if ( m_textContent.TryGetValue ( processor, out var callback ) ) {
-                    result = await callback ( content, cancellationToken );
+                if ( m_textProcessors.TryGetValue ( processor, out var callback ) ) {
+                    result = await callback ( content, context, memoryCache );
                 }
             }
 
@@ -93,11 +98,11 @@ namespace ONielCms.Handlers {
         /// Add processor for text content.
         /// </summary>
         /// <param name="processor">Processor name.</param>
-        /// <param name="callback">CAllback.</param>
-        public static void AddTextProcessor ( string processor, Func<string, CancellationToken, Task<string>> callback ) {
-            if ( m_textContent.ContainsKey ( processor ) ) throw new Exception ( $"Processor with name {processor} already added!" );
+        /// <param name="callback">Callback.</param>
+        public static void AddTextProcessor ( string processor, Func<string, HttpContext, IMemoryCache, Task<string>> callback ) {
+            if ( m_textProcessors.ContainsKey ( processor ) ) throw new Exception ( $"Processor with name {processor} already added!" );
 
-            m_textContent.Add ( processor, callback );
+            m_textProcessors.Add ( processor, callback );
         }
 
     }

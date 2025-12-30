@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using ONielCms;
 using ONielCms.Handlers;
 using ONielCms.Services;
@@ -13,6 +14,8 @@ if ( await CommandLineHandler.HandleCommandLine ( storageService ) ) return;
 Console.WriteLine ( "No commands passed, start to server" );
 
 var builder = WebApplication.CreateBuilder ( Enumerable.Empty<string> ().ToArray () );
+
+builder.Services.AddMemoryCache ();
 
 Dependencies.Resolve ( builder.Services );
 
@@ -29,17 +32,19 @@ app.UseRouting ();
 
 app.MapGet ( "/", async (
     HttpContext context,
+    IMemoryCache cache,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SiteBodyHandler.Handler ( context, "/", routeResponseService, routeService, "GET" );
+        return await SiteBodyHandler.Handler ( context, "/", routeResponseService, routeService, "GET", cache );
     }
 );
 app.MapGet ( "/{*path}", async (
     HttpContext context,
+    IMemoryCache cache,
     [FromRoute] string path,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SiteBodyHandler.Handler ( context, path, routeResponseService, routeService, "GET" );
+        return await SiteBodyHandler.Handler ( context, path, routeResponseService, routeService, "GET", cache );
     }
 );
 
@@ -47,17 +52,19 @@ app.MapGet ( "/{*path}", async (
 
 app.MapPost ( "/", async (
     HttpContext context,
+    IMemoryCache cache,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SiteBodyHandler.Handler ( context, "/", routeResponseService, routeService, "POST" );
+        return await SiteBodyHandler.Handler ( context, "/", routeResponseService, routeService, "POST", cache );
     }
 );
 app.MapPost ( "/{*path}", async (
     HttpContext context,
+    IMemoryCache cache,
     [FromRoute] string path,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SiteBodyHandler.Handler ( context, path, routeResponseService, routeService, "POST" );
+        return await SiteBodyHandler.Handler ( context, path, routeResponseService, routeService, "POST", cache );
     }
 );
 
@@ -65,17 +72,19 @@ app.MapPost ( "/{*path}", async (
 
 app.MapPut ( "/", async (
     HttpContext context,
+    IMemoryCache cache,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SiteBodyHandler.Handler ( context, "/", routeResponseService, routeService, "PUT" );
+        return await SiteBodyHandler.Handler ( context, "/", routeResponseService, routeService, "PUT", cache );
     }
 );
 app.MapPut ( "/{*path}", async (
     HttpContext context,
+    IMemoryCache cache,
     [FromRoute] string path,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SiteBodyHandler.Handler ( context, path, routeResponseService, routeService, "PUT" );
+        return await SiteBodyHandler.Handler ( context, path, routeResponseService, routeService, "PUT", cache );
     }
 );
 
@@ -83,17 +92,19 @@ app.MapPut ( "/{*path}", async (
 
 app.MapDelete ( "/", async (
     HttpContext context,
+    IMemoryCache cache,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SiteBodyHandler.Handler ( context, "/", routeResponseService, routeService, "DELETE" );
+        return await SiteBodyHandler.Handler ( context, "/", routeResponseService, routeService, "DELETE", cache );
     }
 );
 app.MapDelete ( "/{*path}", async (
     HttpContext context,
+    IMemoryCache cache,
     [FromRoute] string path,
     [FromServices] IRouteResponseService routeResponseService,
     [FromServices] IRouteService routeService ) => {
-        return await SiteBodyHandler.Handler ( context, path, routeResponseService, routeService, "DELETE" );
+        return await SiteBodyHandler.Handler ( context, path, routeResponseService, routeService, "DELETE", cache );
     }
 );
 
