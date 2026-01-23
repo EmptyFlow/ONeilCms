@@ -7,18 +7,16 @@ namespace ONielCms.Processors {
     /// </summary>
     public static class CookieAuthentificationProcessor {
 
-        private static readonly ValueTask EmptyValueTask = new();
-
         public static ValueTask CheckAndExitAuthentification ( ref ProcessorState state ) {
             var token = state.HttpContext.Request.Cookies.Where ( a => a.Key == "capst" ).Select ( a => a.Value ).FirstOrDefault ();
             if ( string.IsNullOrEmpty ( token ) || !state.MemoryCache.TryGetValue ( token, out _ ) ) {
                 state.HttpContext.Response.StatusCode = 401; // return 401 code
                 state.Handled = false;
-                return EmptyValueTask;
+                return ProcessorsShared.EmptyValueTask;
             }
 
             state.Handled = true;
-            return EmptyValueTask;
+            return ProcessorsShared.EmptyValueTask;
         }
 
         public static ValueTask CheckAuthentification ( ref ProcessorState state ) {
@@ -26,10 +24,10 @@ namespace ONielCms.Processors {
             state.Handled = true;
             if ( string.IsNullOrEmpty ( token ) || !state.MemoryCache.TryGetValue ( token, out _ ) ) {
                 state.Flags["Authenticated"] = true;
-                return EmptyValueTask;
+                return ProcessorsShared.EmptyValueTask;
             }
 
-            return EmptyValueTask;
+            return ProcessorsShared.EmptyValueTask;
         }
 
     }

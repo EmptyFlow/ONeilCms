@@ -41,8 +41,8 @@ namespace ONielCms.Handlers {
             return new Regex ( result.Replace ( "/", @"\/" ) );
         }
 
-        public (string route, SiteRoute routeId)? GetRoute ( string path ) {
-            if ( m_preciousRoutes.TryGetValue ( path, out var routeId ) ) return (path, routeId);
+        public (string route, SiteRoute routeEntity)? GetRoute ( string path ) {
+            if ( m_preciousRoutes.TryGetValue ( path, out var routeEntity) ) return (path, routeEntity);
 
             var dynamicRouteKey = m_dynamicRoutes.Keys.FirstOrDefault ( a => a.IsMatch ( path ) );
             if ( dynamicRouteKey != null ) {
