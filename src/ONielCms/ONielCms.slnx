@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="../ONeilCms.Tests/ONeilCms.Tests.csproj" />
+  <Project Path="../ONielCommon/ONielCommon.csproj" />
+  <Project Path="ONielCms.csproj" />
+</Solution>
