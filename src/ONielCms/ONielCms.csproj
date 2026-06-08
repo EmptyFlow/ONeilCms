@@ -23,10 +23,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <None Include="..\..\..\..\SciterAPI\SciterAPI\README.md">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
+		<None Include="..\..\..\..\SciterAPI\SciterAPI\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
 	</ItemGroup>
 
 	<ItemGroup>

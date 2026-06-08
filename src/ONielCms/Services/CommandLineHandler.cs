@@ -48,6 +48,22 @@ namespace ONielCms.Services {
                         FlowCommandParameter.CreateRequired(name: "v", alias: "version", help: "Version related to "),
                     }
                 )
+                .AddAsyncCommand(
+                    "remove-all",
+                    async (ImportCommand parameters) => {
+                        var service = new ImportVersionService(storageContext);
+                        try
+                        {
+                            await service.RemoveAllVersions();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                        }
+                    },
+                    "Remove all versions",
+                    []
+                )
                 .RunCommandAsync ();
 
             return !result.EmptyInput && ( result.CommandHandled || result.Handled );
