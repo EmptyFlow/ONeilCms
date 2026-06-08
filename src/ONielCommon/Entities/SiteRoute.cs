@@ -16,8 +16,6 @@ namespace ONielCommon.Entities {
 
         public string Method { get; init; } = "";
 
-        public bool DownloadAsFile { get; set; }
-
         public string DownloadFileName { get; set; } = "";
 
         public string Processors { get; set; } = "";

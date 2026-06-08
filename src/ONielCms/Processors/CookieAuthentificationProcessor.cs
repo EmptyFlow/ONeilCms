@@ -1,17 +1,26 @@
-﻿using static ONielCms.Handlers.SiteBodyHandler;
+﻿using ONielCms.Extensions;
+using System.Runtime.CompilerServices;
+using static ONielCms.Handlers.SiteBodyHandler;
 
-namespace ONielCms.Processors {
+namespace ONielCms.Processors
+{
 
     /// <summary>
-    /// Simple checker
+    /// Cookie authentification checker.
     /// </summary>
-    public static class CookieAuthentificationProcessor {
+    public static class CookieAuthentificationProcessor
+    {
 
-        public static ValueTask CheckAndExitAuthentification ( ref ProcessorState state ) {
-            var token = state.HttpContext.Request.Cookies.Where ( a => a.Key == "capst" ).Select ( a => a.Value ).FirstOrDefault ();
-            if ( string.IsNullOrEmpty ( token ) || !state.MemoryCache.TryGetValue ( token, out _ ) ) {
-                state.HttpContext.Response.StatusCode = 401; // return 401 code
+        private const string DefaultCookieKey = "capst";
+
+        public static ValueTask CheckAndExitAuthentification(ref ProcessorState state, ProcessorElement processorElement)
+        {
+            var cookieKey = GetCookieKey(processorElement);
+            var token = state.HttpContext.Request.Cookies.Where(a => a.Key == cookieKey).Select(a => a.Value).FirstOrDefault();
+            if (string.IsNullOrEmpty(token) || !state.MemoryCache.TryGetValue(token, out _))
+            {
                 state.Handled = false;
+                state.Result = Results.StatusCode(401);
                 return ProcessorsShared.EmptyValueTask;
             }
 
@@ -19,15 +28,24 @@ namespace ONielCms.Processors {
             return ProcessorsShared.EmptyValueTask;
         }
 
-        public static ValueTask CheckAuthentification ( ref ProcessorState state ) {
-            var token = state.HttpContext.Request.Cookies.Where ( a => a.Key == "capst" ).Select ( a => a.Value ).FirstOrDefault ();
+        public static ValueTask CheckAuthentification(ref ProcessorState state, ProcessorElement processorElement)
+        {
+            var cookieKey = GetCookieKey(processorElement);
+            var token = state.HttpContext.Request.Cookies.Where(a => a.Key == cookieKey).Select(a => a.Value).FirstOrDefault();
             state.Handled = true;
-            if ( string.IsNullOrEmpty ( token ) || !state.MemoryCache.TryGetValue ( token, out _ ) ) {
+            if (string.IsNullOrEmpty(token) || !state.MemoryCache.TryGetValue(token, out _))
+            {
                 state.Flags["Authenticated"] = true;
                 return ProcessorsShared.EmptyValueTask;
             }
 
             return ProcessorsShared.EmptyValueTask;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static string GetCookieKey(ProcessorElement processorElement)
+        {
+            return processorElement.Parameters.FirstOrDefault(a => a.Name == "CookieKey")?.Value ?? DefaultCookieKey;
         }
 
     }

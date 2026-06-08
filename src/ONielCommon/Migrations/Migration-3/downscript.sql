@@ -1,0 +1,1 @@
+ALTER TABLE route ADD COLUMN downloadasfile bool NOT NULL DEFAULT false;

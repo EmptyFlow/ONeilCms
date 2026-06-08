@@ -21,14 +21,14 @@
         public string Method { get; init; } = "";
 
         /// <summary>
-        /// Download as file.
-        /// </summary>
-        public bool DownloadAsFile { get; set; }
-
-        /// <summary>
         /// Download file name.
         /// </summary>
         public string DownloadFileName { get; set; } = "";
+
+        /// <summary>
+        /// Processors.
+        /// </summary>
+        public string Processors { get; set; } = "";
 
         /// <summary>
         /// Resources.

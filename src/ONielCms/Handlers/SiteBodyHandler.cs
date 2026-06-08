@@ -4,11 +4,12 @@ using ONielCommon.Entities;
 using ONielCommon.Exceptions;
 using ONielCommon.Storage;
 using ONielCms.Extensions;
-using System.Text;
 
-namespace ONielCms.Handlers {
+namespace ONielCms.Handlers
+{
 
-    public static class SiteBodyHandler {
+    public static class SiteBodyHandler
+    {
 
         private static Dictionary<string, RouteHandler> m_routeHandler = [];
 
@@ -18,44 +19,48 @@ namespace ONielCms.Handlers {
             IRouteResponseService routeResponseService,
             IRouteService routeService,
             string method,
-            IMemoryCache cache) {
-            try {
+            IMemoryCache cache)
+        {
+            try
+            {
                 var routeHandler = m_routeHandler[method];
                 var routePair = routeHandler.GetRoute(path);
-                if ( routePair != null ) {
+                if (routePair != null)
+                {
                     var route = routePair.Value.routeEntity;
                     var response = await routeResponseService.GetResponse(path, route.Id, routeHandler.Version ?? "", httpContext.RequestAborted);
 
-                    if ( route.DownloadAsFile && !string.IsNullOrEmpty(route.DownloadFileName) ) {
-                        return Results.File(response.Item1, route.ContentType, fileDownloadName: route.DownloadFileName);
-                    }
-                    else {
-                        var content = Encoding.UTF8.GetString(response.Item1);
+                    var processors = route.GetProcessors();
+                    if (processors.Any())
+                    {
+                        var state = CreateState(httpContext, cache);
 
-                        var processors = route.GetProcessors();
-                        if ( processors.Any() ) {
-                            var state = CreateState(content, httpContext, cache);
-                            foreach ( var processor in processors ) {
-                                if ( m_textProcessors.TryGetValue(processor.Name, out var processorAction) ) {
-                                    processorAction?.Invoke(ref state);
-                                    if ( !state.Handled ) return Results.StatusCode(state.HttpContext.Response.StatusCode);
-                                }
+                        foreach (var processor in processors)
+                        {
+                            if (m_textProcessors.TryGetValue(processor.Name, out var processorAction))
+                            {
+                                processorAction?.Invoke(ref state);
+                                if (!state.Handled && state.Result is not null) return state.Result;
+                                if (!state.Handled) return Results.StatusCode(500);
                             }
                         }
 
-                        return Results.Content(content, route.ContentType, Encoding.UTF8);
+                        if (state.Result != null) return state.Result;
                     }
 
+                    return Results.File(response.Item1, route.ContentType, fileDownloadName: !string.IsNullOrEmpty(route.DownloadFileName) ? route.DownloadFileName : null);
                 }
-                if ( routePair == null ) return Results.NotFound();
+                if (routePair == null) return Results.NotFound();
 
                 return Results.Ok();
             }
-            catch ( StatusCodeException statusCodeException ) {
+            catch (StatusCodeException statusCodeException)
+            {
                 return Results.StatusCode(statusCodeException.StatusCode);
 #if DEBUG
             }
-            catch ( Exception ex ) {
+            catch (Exception ex)
+            {
                 Console.WriteLine(ex.ToString());
 #else
             } catch {
@@ -64,8 +69,9 @@ namespace ONielCms.Handlers {
             }
         }
 
-        private static void FillHandler(string version, IEnumerable<SiteRoute> routes, Dictionary<string, RouteHandler> handlerDictionary) {
-            if ( !routes.Any() ) return;
+        private static void FillHandler(string version, IEnumerable<SiteRoute> routes, Dictionary<string, RouteHandler> handlerDictionary)
+        {
+            if (!routes.Any()) return;
 
             var handler = new RouteHandler();
             handler.FillRoutesCache(version, routes);
@@ -74,30 +80,34 @@ namespace ONielCms.Handlers {
             handlerDictionary.Add(method, handler);
         }
 
-        public static async Task LoadAllRoutesInCurrentVersion(IConfigurationService configurationService) {
+        public static async Task LoadAllRoutesInCurrentVersion(IConfigurationService configurationService)
+        {
             Dictionary<string, RouteHandler> handlers = new();
             var storageContext = new StorageContext(new ConsoleStorageLogger(), configurationService);
             var routeService = new RouteService(storageContext);
 
             var (routes, version) = await routeService.GetAllRoutesInCurrentVersion();
 
-            foreach ( var group in routes.GroupBy(a => a.Method) ) {
+            foreach (var group in routes.GroupBy(a => a.Method))
+            {
                 FillHandler(version, group, handlers);
             }
 
             m_routeHandler = handlers;
         }
 
-        private static readonly Dictionary<string, TextProcessorDelegate> m_textProcessors = [];
+        private static readonly Dictionary<string, RouteProcessorDelegate> m_textProcessors = [];
 
-        public delegate ValueTask TextProcessorDelegate(ref ProcessorState processorState);
+        public delegate ValueTask RouteProcessorDelegate(ref ProcessorState processorState);
 
-        private static ProcessorState CreateState(string content, HttpContext context, IMemoryCache memoryCache) {
+        private static ProcessorState CreateState(HttpContext context, IMemoryCache memoryCache)
+        {
             var flags = new Dictionary<string, bool>();
-            return new ProcessorState {
+            return new ProcessorState
+            {
                 HttpContext = context,
                 MemoryCache = memoryCache,
-                TextContent = content,
+                Result = null,
                 Handled = true,
                 Flags = flags
             };
@@ -108,19 +118,21 @@ namespace ONielCms.Handlers {
         /// </summary>
         /// <param name="processor">Processor name.</param>
         /// <param name="callback">Callback.</param>
-        public static void AddTextProcessor(string processor, TextProcessorDelegate callback) {
-            if ( m_textProcessors.ContainsKey(processor) ) throw new Exception($"Text processor with name {processor} already added!");
+        public static void AddRouteProcessor(string processor, RouteProcessorDelegate callback)
+        {
+            if (m_textProcessors.ContainsKey(processor)) throw new Exception($"Text processor with name {processor} already added!");
 
             m_textProcessors.Add(processor, callback);
         }
 
-        public struct ProcessorState {
+        public struct ProcessorState
+        {
 
             public HttpContext HttpContext;
 
             public IMemoryCache MemoryCache;
 
-            public string TextContent;
+            public IResult? Result;
 
             public bool Handled;
 

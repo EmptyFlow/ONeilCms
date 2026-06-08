@@ -27,7 +27,7 @@ namespace ONielCms.Services {
                             Console.WriteLine ( ex.Message );
                         }
                     },
-                    "Import new version from specified folder",
+                    "Import new version from file",
                     new List<FlowCommandParameter> {
                         FlowCommandParameter.CreateRequired(name: "p", alias: "path", help: "Path to folder where containing new version"),
                     }

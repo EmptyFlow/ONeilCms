@@ -34,7 +34,7 @@ namespace ONielCms.Services.DatabaseLogic {
 
                     var content = await File.ReadAllTextAsync ( fileName );
                     if ( content == null ) {
-                        Console.WriteLine ( $"Can;t read content from file {fileName}!" );
+                        Console.WriteLine($"Can't read content from file {fileName}!");
                         return;
                     }
                     ImportVersionModel? model;
@@ -135,8 +135,8 @@ namespace ONielCms.Services.DatabaseLogic {
                                 ContentType = route.ContentType,
                                 Method = ImportRoutines.GetMethodName ( route.Method ),
                                 Path = route.Path,
-                                DownloadAsFile = route.DownloadAsFile,
                                 DownloadFileName = route.DownloadFileName,
+                                Processors = route.Processors
                             };
                             await m_storageContext.AddOrUpdate ( routeModel );
                             var routeVersion = new RouteVersion {
@@ -262,7 +262,6 @@ namespace ONielCms.Services.DatabaseLogic {
                         var newRoute = new RouteEntity {
                             Method = "GET",
                             ContentType = mimeType,
-                            DownloadAsFile = isDownloadble,
                             DownloadFileName = isDownloadble ? Path.GetFileName ( nameOfResource ) : "",
                             Path = nameOfRoute
                         };
