@@ -1,23 +1,75 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using ONielCms.Services.DatabaseLogic;
-using ONielCommon.Entities;
 using ONielCommon.Exceptions;
-using ONielCommon.Storage;
-using ONielCms.Extensions;
+using System.Collections.Concurrent;
 
 namespace ONielCms.Handlers
 {
 
-	public static class SiteBodyHandler
+	public class HttpRoute
 	{
 
-		private static Dictionary<string, RouteHandler> m_routeHandler = [];
+		public Guid Id { get; init; }
+
+		public string Path { get; init; } = "";
+
+		public string ContentType { get; init; } = "";
+
+		public string Method { get; init; } = "";
+
+		public string DownloadFileName { get; set; } = "";
+
+		public string Processors { get; set; } = "";
+
+	}
+
+	public record ProcessorElementParameter(string Name, string Value);
+
+	public record ProcessorElement(string Name, IEnumerable<ProcessorElementParameter> Parameters);
+
+	public interface IProcessorsDeserializer
+	{
+
+		IEnumerable<ProcessorElement> Deserialize(string processors);
+
+	}
+
+	public static class HttpRouteExtensions
+	{
+
+		private static ConcurrentDictionary<string, IEnumerable<ProcessorElement>> _processorsCache = [];
+
+		extension(HttpRoute target)
+		{
+
+			public IEnumerable<ProcessorElement> GetProcessors(IProcessorsDeserializer processorsDeserializer)
+			{
+				var processors = target.Processors;
+				if (string.IsNullOrEmpty(processors)) return [];
+
+				if (!_processorsCache.ContainsKey(processors)) return _processorsCache[processors];
+
+				var processorItems = processorsDeserializer.Deserialize(processors);
+				if (processorItems?.Any() == true) _processorsCache.TryAdd(processors, processorItems);
+
+				return processorItems != null ? processorItems : [];
+			}
+
+		}
+
+	}
+
+	public static class HttpRouteHandler
+	{
+
+		private static Dictionary<string, RouteCache> m_routeHandler = [];
 
 		public static async Task<IResult> Handler(
 			HttpContext httpContext,
 			string path,
 			IRouteResponseService routeResponseService,
 			IRouteService routeService,
+			IProcessorsDeserializer processorsDeserializer,
 			string method,
 			IMemoryCache cache)
 		{
@@ -30,14 +82,14 @@ namespace ONielCms.Handlers
 					var route = routePair.Value.routeEntity;
 					var response = await routeResponseService.GetResponse(path, route.Id, routeHandler.Version ?? "", httpContext.RequestAborted);
 
-					var processors = route.GetProcessors();
+					var processors = route.GetProcessors(processorsDeserializer);
 					if (processors.Any())
 					{
 						var state = CreateState(httpContext, cache);
 
 						foreach (var processor in processors)
 						{
-							if (m_textProcessors.TryGetValue(processor.Name, out var processorAction))
+							if (m_routeProcessors.TryGetValue(processor.Name, out var processorAction))
 							{
 								processorAction?.Invoke(ref state);
 								if (!state.Handled && state.Result is not null) return state.Result;
@@ -69,25 +121,22 @@ namespace ONielCms.Handlers
 			}
 		}
 
-		private static void FillHandler(string version, IEnumerable<SiteRoute> routes, Dictionary<string, RouteHandler> handlerDictionary)
+		private static void FillHandler(string version, IEnumerable<HttpRoute> routes, Dictionary<string, RouteCache> handlerDictionary)
 		{
 			if (!routes.Any()) return;
 
-			var handler = new RouteHandler();
+			var handler = new RouteCache();
 			handler.FillRoutesCache(version, routes);
 			var method = routes.First().Method;
 
 			handlerDictionary.Add(method, handler);
 		}
 
-		public static async Task LoadAllRoutesInCurrentVersion(IConfigurationService configurationService)
+		public static async Task LoadRoutesExtent(string version, IEnumerable<HttpRoute> routes)
 		{
-			Dictionary<string, RouteHandler> handlers = new();
-			var storageContext = new StorageContext(new ConsoleStorageLogger(), configurationService);
-			var routeService = new RouteService(storageContext);
+			m_routeHandler.Clear();
 
-			var (routes, version) = await routeService.GetAllRoutesInCurrentVersion();
-
+			Dictionary<string, RouteCache> handlers = new();
 			foreach (var group in routes.GroupBy(a => a.Method))
 			{
 				FillHandler(version, group, handlers);
@@ -96,7 +145,7 @@ namespace ONielCms.Handlers
 			m_routeHandler = handlers;
 		}
 
-		private static readonly Dictionary<string, RouteProcessorDelegate> m_textProcessors = [];
+		private static readonly Dictionary<string, RouteProcessorDelegate> m_routeProcessors = [];
 
 		public delegate ValueTask RouteProcessorDelegate(ref ProcessorState processorState);
 
@@ -120,9 +169,9 @@ namespace ONielCms.Handlers
 		/// <param name="callback">Callback.</param>
 		public static void AddRouteProcessor(string processor, RouteProcessorDelegate callback)
 		{
-			if (m_textProcessors.ContainsKey(processor)) throw new Exception($"Text processor with name {processor} already added!");
+			if (m_routeProcessors.ContainsKey(processor)) throw new Exception($"Text processor with name {processor} already added!");
 
-			m_textProcessors.Add(processor, callback);
+			m_routeProcessors.Add(processor, callback);
 		}
 
 		public struct ProcessorState
