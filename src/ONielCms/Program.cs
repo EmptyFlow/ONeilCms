@@ -60,10 +60,9 @@ app.MapGet("/", async (
 	HttpContext context,
 	IMemoryCache cache,
 	[FromServices] IRouteResponseService routeResponseService,
-	[FromServices] IRouteService routeService,
 	[FromServices] IProcessorsDeserializer processorsDeserializer) =>
 {
-	return await HttpRouteHandler.Handler(context, "/", routeResponseService, routeService, processorsDeserializer, "GET", cache);
+	return await HttpRouteHandler.Handler(context, "/", routeResponseService, processorsDeserializer, "GET", cache);
 }
 );
 app.MapGet("/{*path}", async (
@@ -71,10 +70,9 @@ app.MapGet("/{*path}", async (
 	IMemoryCache cache,
 	[FromRoute] string path,
 	[FromServices] IRouteResponseService routeResponseService,
-	[FromServices] IRouteService routeService,
 	[FromServices] IProcessorsDeserializer processorsDeserializer) =>
 {
-	return await HttpRouteHandler.Handler(context, path, routeResponseService, routeService, processorsDeserializer, "GET", cache);
+	return await HttpRouteHandler.Handler(context, path, routeResponseService, processorsDeserializer, "GET", cache);
 }
 );
 
@@ -84,10 +82,9 @@ app.MapPost("/", async (
 	HttpContext context,
 	IMemoryCache cache,
 	[FromServices] IRouteResponseService routeResponseService,
-	[FromServices] IRouteService routeService,
 	[FromServices] IProcessorsDeserializer processorsDeserializer) =>
 {
-	return await HttpRouteHandler.Handler(context, "/", routeResponseService, routeService, processorsDeserializer, "POST", cache);
+	return await HttpRouteHandler.Handler(context, "/", routeResponseService, processorsDeserializer, "POST", cache);
 }
 );
 app.MapPost("/{*path}", async (
@@ -95,10 +92,9 @@ app.MapPost("/{*path}", async (
 	IMemoryCache cache,
 	[FromRoute] string path,
 	[FromServices] IRouteResponseService routeResponseService,
-	[FromServices] IRouteService routeService,
 	[FromServices] IProcessorsDeserializer processorsDeserializer) =>
 {
-	return await HttpRouteHandler.Handler(context, path, routeResponseService, routeService, processorsDeserializer, "POST", cache);
+	return await HttpRouteHandler.Handler(context, path, routeResponseService, processorsDeserializer, "POST", cache);
 }
 );
 
@@ -108,10 +104,9 @@ app.MapPut("/", async (
 	HttpContext context,
 	IMemoryCache cache,
 	[FromServices] IRouteResponseService routeResponseService,
-	[FromServices] IRouteService routeService,
 	[FromServices] IProcessorsDeserializer processorsDeserializer) =>
 {
-	return await HttpRouteHandler.Handler(context, "/", routeResponseService, routeService, processorsDeserializer, "PUT", cache);
+	return await HttpRouteHandler.Handler(context, "/", routeResponseService, processorsDeserializer, "PUT", cache);
 }
 );
 app.MapPut("/{*path}", async (
@@ -119,10 +114,9 @@ app.MapPut("/{*path}", async (
 	IMemoryCache cache,
 	[FromRoute] string path,
 	[FromServices] IRouteResponseService routeResponseService,
-	[FromServices] IRouteService routeService,
 	[FromServices] IProcessorsDeserializer processorsDeserializer) =>
 {
-	return await HttpRouteHandler.Handler(context, path, routeResponseService, routeService, processorsDeserializer, "PUT", cache);
+	return await HttpRouteHandler.Handler(context, path, routeResponseService, processorsDeserializer, "PUT", cache);
 }
 );
 
@@ -132,10 +126,9 @@ app.MapDelete("/", async (
 	HttpContext context,
 	IMemoryCache cache,
 	[FromServices] IRouteResponseService routeResponseService,
-	[FromServices] IRouteService routeService,
 	[FromServices] IProcessorsDeserializer processorsDeserializer) =>
 {
-	return await HttpRouteHandler.Handler(context, "/", routeResponseService, routeService, processorsDeserializer, "DELETE", cache);
+	return await HttpRouteHandler.Handler(context, "/", routeResponseService, processorsDeserializer, "DELETE", cache);
 }
 );
 app.MapDelete("/{*path}", async (
@@ -143,10 +136,9 @@ app.MapDelete("/{*path}", async (
 	IMemoryCache cache,
 	[FromRoute] string path,
 	[FromServices] IRouteResponseService routeResponseService,
-	[FromServices] IRouteService routeService,
 	[FromServices] IProcessorsDeserializer processorsDeserializer) =>
 {
-	return await HttpRouteHandler.Handler(context, path, routeResponseService, routeService, processorsDeserializer, "DELETE", cache);
+	return await HttpRouteHandler.Handler(context, path, routeResponseService, processorsDeserializer, "DELETE", cache);
 }
 );
 

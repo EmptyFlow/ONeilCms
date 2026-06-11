@@ -68,7 +68,6 @@ namespace ONielCms.Handlers
 			HttpContext httpContext,
 			string path,
 			IRouteResponseService routeResponseService,
-			IRouteService routeService,
 			IProcessorsDeserializer processorsDeserializer,
 			string method,
 			IMemoryCache cache)
@@ -91,7 +90,7 @@ namespace ONielCms.Handlers
 						{
 							if (m_routeProcessors.TryGetValue(processor.Name, out var processorAction))
 							{
-								processorAction?.Invoke(ref state);
+								processorAction?.Invoke(ref state, processor);
 								if (!state.Handled && state.Result is not null) return state.Result;
 								if (!state.Handled) return Results.StatusCode(500);
 							}
@@ -147,7 +146,7 @@ namespace ONielCms.Handlers
 
 		private static readonly Dictionary<string, RouteProcessorDelegate> m_routeProcessors = [];
 
-		public delegate ValueTask RouteProcessorDelegate(ref ProcessorState processorState);
+		public delegate ValueTask RouteProcessorDelegate(ref ProcessorState processorState, ProcessorElement processorElement);
 
 		private static ProcessorState CreateState(HttpContext context, IMemoryCache memoryCache)
 		{
