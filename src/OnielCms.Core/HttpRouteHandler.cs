@@ -17,16 +17,6 @@ namespace OnielCms.Core
 
 		private static Dictionary<string, RouteCache> m_routeHandler = [];
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private static RouteParameters GetRouteParameters(HttpRoute route, string path)
-		{
-			var queryParameters = QueryHelpers.ParseQuery(new Uri("http://localhost" + path).Query)
-				.Select(a => new { a.Key, Items = a.Value.Select(b => b?.ToString() ?? "").ToArray() })
-				.ToDictionary(a => a.Key, a => a.Items);
-
-			return new RouteParameters(queryParameters, new Dictionary<string, string>());
-		}
-
 		public static void RegisterMethodHandlers(WebApplication app)
 		{
 			app.MapGet("/", async (
@@ -132,8 +122,7 @@ namespace OnielCms.Core
 				{
 					var route = routePair.Value.routeEntity;
 
-					var parameters = GetRouteParameters(route, path);
-					var response = await routeResponse.Get(route, cache, httpContext, routeHandler.Version ?? "", parameters, httpContext.RequestAborted);
+					var response = await routeResponse.Get(route, cache, httpContext, routeHandler.Version ?? "", httpContext.RequestAborted);
 
 					var processors = route.GetProcessors(processorsDeserializer);
 					if (processors.Any())
