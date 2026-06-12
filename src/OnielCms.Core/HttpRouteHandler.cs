@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Caching.Memory;
 using System.Runtime.CompilerServices;
@@ -23,6 +25,95 @@ namespace OnielCms.Core
 				.ToDictionary(a => a.Key, a => a.Items);
 
 			return new RouteParameters(queryParameters, new Dictionary<string, string>());
+		}
+
+		public static void RegisterMethodHandlers(WebApplication app)
+		{
+			app.MapGet("/", async (
+				HttpContext context,
+				IMemoryCache cache,
+				[FromServices] IRouteResponse routeResponseService,
+				[FromServices] IProcessorsDeserializer processorsDeserializer) =>
+			{
+				return await Handler(context, "/", routeResponseService, processorsDeserializer, "GET", cache);
+			}
+);
+			app.MapGet("/{*path}", async (
+				HttpContext context,
+				IMemoryCache cache,
+				[FromRoute] string path,
+				[FromServices] IRouteResponse routeResponseService,
+				[FromServices] IProcessorsDeserializer processorsDeserializer) =>
+			{
+				return await Handler(context, path, routeResponseService, processorsDeserializer, "GET", cache);
+			}
+			);
+
+			// Post Handler
+
+			app.MapPost("/", async (
+				HttpContext context,
+				IMemoryCache cache,
+				[FromServices] IRouteResponse routeResponseService,
+				[FromServices] IProcessorsDeserializer processorsDeserializer) =>
+			{
+				return await Handler(context, "/", routeResponseService, processorsDeserializer, "POST", cache);
+			}
+			);
+			app.MapPost("/{*path}", async (
+				HttpContext context,
+				IMemoryCache cache,
+				[FromRoute] string path,
+				[FromServices] IRouteResponse routeResponseService,
+				[FromServices] IProcessorsDeserializer processorsDeserializer) =>
+			{
+				return await Handler(context, path, routeResponseService, processorsDeserializer, "POST", cache);
+			}
+			);
+
+			// Put Handler
+
+			app.MapPut("/", async (
+				HttpContext context,
+				IMemoryCache cache,
+				[FromServices] IRouteResponse routeResponseService,
+				[FromServices] IProcessorsDeserializer processorsDeserializer) =>
+			{
+				return await Handler(context, "/", routeResponseService, processorsDeserializer, "PUT", cache);
+			}
+			);
+			app.MapPut("/{*path}", async (
+				HttpContext context,
+				IMemoryCache cache,
+				[FromRoute] string path,
+				[FromServices] IRouteResponse routeResponseService,
+				[FromServices] IProcessorsDeserializer processorsDeserializer) =>
+			{
+				return await Handler(context, path, routeResponseService, processorsDeserializer, "PUT", cache);
+			}
+			);
+
+			// Delete Handler
+
+			app.MapDelete("/", async (
+				HttpContext context,
+				IMemoryCache cache,
+				[FromServices] IRouteResponse routeResponseService,
+				[FromServices] IProcessorsDeserializer processorsDeserializer) =>
+			{
+				return await Handler(context, "/", routeResponseService, processorsDeserializer, "DELETE", cache);
+			}
+			);
+			app.MapDelete("/{*path}", async (
+				HttpContext context,
+				IMemoryCache cache,
+				[FromRoute] string path,
+				[FromServices] IRouteResponse routeResponseService,
+				[FromServices] IProcessorsDeserializer processorsDeserializer) =>
+			{
+				return await Handler(context, path, routeResponseService, processorsDeserializer, "DELETE", cache);
+			}
+			);
 		}
 
 		public static async Task<IResult> Handler(
