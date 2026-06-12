@@ -17,7 +17,7 @@ namespace ONielCms.Services.DatabaseLogic {
             }
         }
 
-        public async Task<(byte[], int)> GetResponse ( string path, Guid routeId, string version, CancellationToken cancellationToken = default ) {
+        public async Task<byte[]> GetResponse ( Guid routeId, string version, CancellationToken cancellationToken = default ) {
             var resources = await _storageContext.GetAsync<Resource> (
                 new Query ()
                     .Join ( "routeresource", "routeresource.resourceid", "resource.id" )
@@ -28,7 +28,7 @@ namespace ONielCms.Services.DatabaseLogic {
                     .OrderBy ( "routeresource.renderorder" ),
                 cancellationToken
             );
-            if ( !resources.Any () ) return ([], 204);
+            if ( !resources.Any () ) return [];
 
             var response = new MemoryStream ();
             await foreach ( var resource in CombineContent ( response, resources ).WithCancellation ( cancellationToken ) ) {
@@ -38,7 +38,7 @@ namespace ONielCms.Services.DatabaseLogic {
             }
             response.Position = 0;
 
-            return (response.ToArray (), 200);
+            return response.ToArray ();
         }
 
     }

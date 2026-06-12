@@ -1,6 +1,6 @@
-﻿using ONielCms.Handlers;
+﻿using OnielCms.Core;
 using System.Runtime.CompilerServices;
-using static ONielCms.Handlers.HttpRouteHandler;
+using static OnielCms.Core.HttpRouteHandler;
 
 namespace ONielCms.Processors
 {

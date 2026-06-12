@@ -34,6 +34,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\OnielCms.Core\OnielCms.Core.csproj" />
 		<ProjectReference Include="..\ONielCommon\ONielCommon.csproj" />
 	</ItemGroup>
 

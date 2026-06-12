@@ -1,73 +1,34 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using ONielCms.Services.DatabaseLogic;
-using ONielCommon.Exceptions;
-using System.Collections.Concurrent;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Caching.Memory;
+using System.Runtime.CompilerServices;
 
-namespace ONielCms.Handlers
+namespace OnielCms.Core
 {
-
-	public class HttpRoute
-	{
-
-		public Guid Id { get; init; }
-
-		public string Path { get; init; } = "";
-
-		public string ContentType { get; init; } = "";
-
-		public string Method { get; init; } = "";
-
-		public string DownloadFileName { get; set; } = "";
-
-		public string Processors { get; set; } = "";
-
-	}
 
 	public record ProcessorElementParameter(string Name, string Value);
 
 	public record ProcessorElement(string Name, IEnumerable<ProcessorElementParameter> Parameters);
-
-	public interface IProcessorsDeserializer
-	{
-
-		IEnumerable<ProcessorElement> Deserialize(string processors);
-
-	}
-
-	public static class HttpRouteExtensions
-	{
-
-		private static ConcurrentDictionary<string, IEnumerable<ProcessorElement>> _processorsCache = [];
-
-		extension(HttpRoute target)
-		{
-
-			public IEnumerable<ProcessorElement> GetProcessors(IProcessorsDeserializer processorsDeserializer)
-			{
-				var processors = target.Processors;
-				if (string.IsNullOrEmpty(processors)) return [];
-
-				if (!_processorsCache.ContainsKey(processors)) return _processorsCache[processors];
-
-				var processorItems = processorsDeserializer.Deserialize(processors);
-				if (processorItems?.Any() == true) _processorsCache.TryAdd(processors, processorItems);
-
-				return processorItems != null ? processorItems : [];
-			}
-
-		}
-
-	}
 
 	public static class HttpRouteHandler
 	{
 
 		private static Dictionary<string, RouteCache> m_routeHandler = [];
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private static RouteParameters GetRouteParameters(HttpRoute route, string path)
+		{
+			var queryParameters = QueryHelpers.ParseQuery(new Uri("http://localhost" + path).Query)
+				.Select(a => new { a.Key, Items = a.Value.Select(b => b?.ToString() ?? "").ToArray() })
+				.ToDictionary(a => a.Key, a => a.Items);
+
+			return new RouteParameters(queryParameters, new Dictionary<string, string>());
+		}
+
 		public static async Task<IResult> Handler(
 			HttpContext httpContext,
 			string path,
-			IRouteResponseService routeResponseService,
+			IRouteResponse routeResponse,
 			IProcessorsDeserializer processorsDeserializer,
 			string method,
 			IMemoryCache cache)
@@ -79,7 +40,9 @@ namespace ONielCms.Handlers
 				if (routePair != null)
 				{
 					var route = routePair.Value.routeEntity;
-					var response = await routeResponseService.GetResponse(path, route.Id, routeHandler.Version ?? "", httpContext.RequestAborted);
+
+					var parameters = GetRouteParameters(route, path);
+					var response = await routeResponse.Get(route, cache, httpContext, routeHandler.Version ?? "", parameters, httpContext.RequestAborted);
 
 					var processors = route.GetProcessors(processorsDeserializer);
 					if (processors.Any())
@@ -99,7 +62,9 @@ namespace ONielCms.Handlers
 						if (state.Result != null) return state.Result;
 					}
 
-					return Results.File(response.Item1, route.ContentType, fileDownloadName: !string.IsNullOrEmpty(route.DownloadFileName) ? route.DownloadFileName : null);
+					if (response.Length == 0) return Results.StatusCode(204); // no content
+
+					return Results.File(response, route.ContentType, fileDownloadName: !string.IsNullOrEmpty(route.DownloadFileName) ? route.DownloadFileName : null);
 				}
 				if (routePair == null) return Results.NotFound();
 

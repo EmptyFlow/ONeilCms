@@ -1,4 +1,4 @@
-﻿using ONielCms.Handlers;
+﻿using OnielCms.Core;
 using ONielCms.Services;
 using ONielCms.Services.DatabaseLogic;
 using ONielCommon.Storage;
@@ -20,6 +20,7 @@ namespace ONielCms
 			collection.AddScoped<IRouteService, RouteService>();
 			collection.AddScoped<IRouteResponseService, RouteResponseService>();
 			collection.AddScoped<IProcessorsDeserializer, ProcessorsDeserializer>();
+			collection.AddScoped<IRouteResponse, RouteResponse>();
 
 		}
 

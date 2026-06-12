@@ -2,7 +2,7 @@
 
     public interface IRouteResponseService {
 
-        public Task<(byte[], int)> GetResponse ( string path, Guid routeId, string version, CancellationToken cancellationToken = default );
+        public Task<byte[]> GetResponse ( Guid routeId, string version, CancellationToken cancellationToken = default );
 
     }
 
