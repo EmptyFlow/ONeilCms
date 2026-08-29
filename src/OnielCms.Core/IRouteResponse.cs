@@ -8,6 +8,8 @@ namespace OnielCms.Core
 
 		Task<byte[]> Get(HttpRoute httpRoute, IMemoryCache cache, HttpContext httpContext, string version, CancellationToken cancellationToken = default);
 
+		Task<byte[]> GetFile(Guid id, string version, HttpContext httpContext);
+
 	}
 
 }

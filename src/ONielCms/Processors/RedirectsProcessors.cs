@@ -1,5 +1,4 @@
 ﻿using OnielCms.Core;
-using static OnielCms.Core.HttpRouteHandler;
 
 namespace ONielCms.Processors
 {
@@ -7,27 +6,23 @@ namespace ONielCms.Processors
 	public static class RedirectsProcessors
 	{
 
-		public static ValueTask TemporaryRedirect(ref ProcessorState state, ProcessorElement processorElement)
+		public static ValueTask<IResult> TemporaryRedirect(HttpContext httpContext, IEnumerable<ProcessorElementParameter> parameters)
 		{
-			string redirectUrl = GetRedirectUrl(processorElement);
+			string redirectUrl = GetRedirectUrl(parameters);
 
-			state.Result = Results.Redirect(redirectUrl, false, true);
-			state.Handled = true;
-			return ProcessorsShared.EmptyValueTask;
+			return ValueTask.FromResult(Results.Redirect(redirectUrl, false, true));
 		}
 
-		public static ValueTask TemporaryRedirectWithoutBody(ref ProcessorState state, ProcessorElement processorElement)
+		public static ValueTask<IResult> TemporaryRedirectWithoutBody(HttpContext httpContext, IEnumerable<ProcessorElementParameter> parameters)
 		{
-			string redirectUrl = GetRedirectUrl(processorElement);
+			string redirectUrl = GetRedirectUrl(parameters);
 
-			state.HttpContext.Response.Redirect(redirectUrl, false, false);
-			state.Handled = true;
-			return ProcessorsShared.EmptyValueTask;
+			return ValueTask.FromResult(Results.Redirect(redirectUrl, false, false));
 		}
 
-		private static string GetRedirectUrl(ProcessorElement processorElement)
+		private static string GetRedirectUrl(IEnumerable<ProcessorElementParameter> parameters)
 		{
-			var redirectUrl = processorElement.Parameters.FirstOrDefault(a => a.Name == "Url")?.Value ?? "";
+			var redirectUrl = parameters.FirstOrDefault(a => a.Name == "Url")?.Value ?? "";
 			if (string.IsNullOrEmpty(redirectUrl)) throw new Exception("TemporaryRedirect: Url parameter is required to perform this action!");
 			return redirectUrl;
 		}

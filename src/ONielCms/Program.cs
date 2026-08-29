@@ -19,7 +19,10 @@ Dependencies.Resolve(builder.Services);
 
 var app = builder.Build();
 
-// load routes from current version and cache it
+//app.Urls.Add("http://localhost:4000");
+
+app.UseRouting();
+
 using (var scope = app.Services.CreateScope())
 {
 	var configurationService = scope.ServiceProvider.GetService<IConfigurationService>();
@@ -31,6 +34,7 @@ using (var scope = app.Services.CreateScope())
 		var (routes, version) = await routeService.GetAllRoutesInCurrentVersion();
 
 		await HttpRouteHandler.LoadRoutesExtent(
+			app,
 			version,
 			routes
 				.Select(
@@ -41,17 +45,11 @@ using (var scope = app.Services.CreateScope())
 						Id = a.Id,
 						Method = a.Method,
 						Path = a.Path,
-						Processors = a.Processors
+						Processors = []
 					}
 				)
 		);
 	}
 }
-
-//app.Urls.Add("http://localhost:4000");
-
-app.UseRouting();
-
-HttpRouteHandler.RegisterMethodHandlers(app);
 
 app.Run();

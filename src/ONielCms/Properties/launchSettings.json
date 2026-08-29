@@ -2,7 +2,8 @@
   "profiles": {
     "http": {
       "commandName": "Project",
-      "commandLineArgs": "import-folder --path=C:/work/Experiments/testwebsite --version=1",
+       /*"commandLineArgs": "import-folder -p=C:/work/Repositories/WebApp/EmptyFlowApps/src -v=1.0.0",*/
+      "commandLineArgs": "",
       "launchUrl": "/",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

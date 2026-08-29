@@ -13,7 +13,7 @@
 
 		public string DownloadFileName { get; set; } = "";
 
-		public string Processors { get; set; } = "";
+		public List<ProcessorElement> Processors { get; set; } = Enumerable.Empty<ProcessorElement>().ToList();
 
 	}
 

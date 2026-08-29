@@ -16,6 +16,11 @@ namespace ONielCms.Services
 			return await m_routeResponseService.GetResponse(httpRoute.Id, version, httpContext.RequestAborted);
 		}
 
+		public Task<byte[]> GetFile(Guid id, string version, HttpContext httpContext)
+		{
+			return m_routeResponseService.GetResponse(id, version, httpContext.RequestAborted);
+		}
+
 	}
 
 }
