@@ -2,5 +2,6 @@
   <Project Path="../ONeilCms.Tests/ONeilCms.Tests.csproj" />
   <Project Path="../OnielCms.Core/OnielCms.Core.csproj" Id="47ca454f-488e-4000-a328-345ee79c441f" />
   <Project Path="../ONielCommon/ONielCommon.csproj" />
+  <Project Path="../WebApplaud/WebApplaud.csproj" Id="41e7bcb8-eb8a-4bc0-a508-639570a0becb" />
   <Project Path="ONielCms.csproj" />
 </Solution>

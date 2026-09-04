@@ -15,6 +15,10 @@
 
 		public List<ProcessorElement> Processors { get; set; } = Enumerable.Empty<ProcessorElement>().ToList();
 
+		public int? ServerCacheResponseSeconds { get; set; }
+
+		public int? ClientCacheResponseSeconds { get; set; }
+
 	}
 
 }

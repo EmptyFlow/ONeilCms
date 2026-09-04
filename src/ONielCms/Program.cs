@@ -14,6 +14,15 @@ Console.WriteLine("No commands passed, start to server");
 var builder = WebApplication.CreateBuilder(Enumerable.Empty<string>().ToArray());
 
 builder.Services.AddMemoryCache();
+builder.Services.AddOutputCache(a =>
+{
+	// max body 2 Mb
+	a.MaximumBodySize = 2 * 1024 * 1024;
+	// size of storage 50 Mb
+	a.SizeLimit = 50 * 1024 * 1024;
+	a.DefaultExpirationTimeSpan = TimeSpan.FromMinutes(2);
+});
+builder.Services.AddResponseCaching();
 
 Dependencies.Resolve(builder.Services);
 
@@ -21,6 +30,8 @@ var app = builder.Build();
 
 //app.Urls.Add("http://localhost:4000");
 
+app.UseOutputCache();
+app.UseResponseCaching();
 app.UseRouting();
 
 using (var scope = app.Services.CreateScope())
@@ -30,10 +41,9 @@ using (var scope = app.Services.CreateScope())
 
 	if (configurationService != null && routeService != null)
 	{
-		Dictionary<string, RouteCache> handlers = [];
 		var (routes, version) = await routeService.GetAllRoutesInCurrentVersion();
 
-		await HttpRouteHandler.LoadRoutesExtent(
+		HttpRouteHandler.LoadRoutesExtent(
 			app,
 			version,
 			routes
