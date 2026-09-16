@@ -54,10 +54,10 @@ var appIdentifiers = new Dictionary<string, string>();
 foreach (var application in applications)
 {
 	var appName = application.Name;
-	var id = Guid.NewGuid().ToString();
+	var id = Guid.NewGuid().ToString().Replace("-", "");
 	appIdentifiers.Add(id, appName);
 
-	var basePath = $"app/{id}/";
+	var basePath = $"{id}/";
 
 	foreach (var file in application.EnumerateFiles("*", SearchOption.AllDirectories))
 	{
@@ -65,9 +65,10 @@ foreach (var application in applications)
 		var localFolder = directory.Replace(application.FullName, "").Replace("\\", "/");
 		if (localFolder.Length > 0)
 		{
-			localFolder = localFolder.Substring(1);
+			if (localFolder.First() == '/') localFolder = localFolder.Substring(1);
 			if (localFolder.Last() != '/') localFolder = localFolder + '/';
 		}
+		if ($"{localFolder}{file.Name}" == "appapi.js") continue;
 
 		var mimeType = GetMimeTypeForFileExtension(file.Extension);
 		app.MapGet($"{basePath}{localFolder}{file.Name}", () =>
@@ -76,6 +77,11 @@ foreach (var application in applications)
 			return Results.File(stream, contentType: mimeType, fileDownloadName: file.Name, enableRangeProcessing: true, lastModified: file.LastWriteTimeUtc);
 		});
 	}
+
+	app.MapGet($"{basePath}appapi.js", () =>
+	{
+		return Results.File([], contentType: "application/json", fileDownloadName: "appapi.js");
+	});
 }
 
 static string GetMimeTypeForFileExtension(string filePath)
