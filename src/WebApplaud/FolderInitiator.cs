@@ -1,4 +1,6 @@
-﻿namespace WebApplaud
+﻿using WebApplaud.Models;
+
+namespace WebApplaud
 {
 	public static class FolderInitiator
 	{
@@ -6,7 +8,8 @@
 		private static Dictionary<string, string> m_rootFolders = new()
 		{
 			["apps"] = "Application",
-			["data"] = "Data"
+			["data"] = "Data",
+			["settings"] = "Settings",
 		};
 
 		private static Dictionary<string, string> m_dataFolders = new()
@@ -67,6 +70,31 @@
 
 			return true;
 		}
+
+		/*public static bool CreateUser(string root, string firstName, string lastName, string login, string? role = default, string? permissions = default)
+		{
+			var usersDataFolder = CreateDirectory(Path.Combine(root, "data/users"), login);
+			if (!usersDataFolder) return false;
+
+			UserProfile userProfile = new UserProfile {
+				FirstName = firstName,
+				LastName = lastName,
+				Login = login,
+				Role = role,
+				Permissions = permissions,
+				Password = ""
+			};
+
+			var profileFile = Path.Combine(root, "settings", "profiles");
+			IEnumerable<UserProfile>
+			if (File.Exists(profileFile)) {
+
+			} else {
+				
+			}
+			var profiles = File.Read ;
+			//var userProfile = 
+		}*/
 
 	}
 }

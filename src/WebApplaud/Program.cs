@@ -1,5 +1,4 @@
-
-using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.StaticFiles;
 using System.Reflection;
 using WebApplaud;
 
@@ -24,14 +23,14 @@ if (FolderInitiator.FoldersNotExists(GlobalConfig.Path))
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMemoryCache();
-/*builder.Services.AddOutputCache(a =>
+builder.Services.AddOutputCache(a =>
 {
 	// max body 2 Mb
 	a.MaximumBodySize = 2 * 1024 * 1024;
 	// size of storage 50 Mb
 	a.SizeLimit = 50 * 1024 * 1024;
 	a.DefaultExpirationTimeSpan = TimeSpan.FromMinutes(5);
-});*/
+});
 builder.Services.AddResponseCaching();
 
 //Dependencies.Resolve(builder.Services);
@@ -45,15 +44,53 @@ if (app.Environment.IsDevelopment()) app.MapOpenApi();
 
 if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection();
 
-app.UseStaticFiles(new StaticFileOptions
-{
-	FileProvider = new PhysicalFileProvider(Path.Combine(GlobalConfig.Path, "apps")),
-	RequestPath = "/apps"
-});
-
-//app.UseOutputCache();
+app.UseOutputCache();
 app.UseResponseCaching();
 app.UseRouting();
+
+var appsDirectory = new DirectoryInfo(Path.Combine(GlobalConfig.Path, "apps"));
+var applications = appsDirectory.GetDirectories();
+var appIdentifiers = new Dictionary<string, string>();
+foreach (var application in applications)
+{
+	var appName = application.Name;
+	var id = Guid.NewGuid().ToString();
+	appIdentifiers.Add(id, appName);
+
+	var basePath = $"app/{id}/";
+
+	foreach (var file in application.EnumerateFiles("*", SearchOption.AllDirectories))
+	{
+		var directory = file.DirectoryName ?? "";
+		var localFolder = directory.Replace(application.FullName, "").Replace("\\", "/");
+		if (localFolder.Length > 0)
+		{
+			localFolder = localFolder.Substring(1);
+			if (localFolder.Last() != '/') localFolder = localFolder + '/';
+		}
+
+		var mimeType = GetMimeTypeForFileExtension(file.Extension);
+		app.MapGet($"{basePath}{localFolder}{file.Name}", () =>
+		{
+			var stream = File.OpenRead(file.FullName);
+			return Results.File(stream, contentType: mimeType, fileDownloadName: file.Name, enableRangeProcessing: true, lastModified: file.LastWriteTimeUtc);
+		});
+	}
+}
+
+static string GetMimeTypeForFileExtension(string filePath)
+{
+	const string DefaultContentType = "application/octet-stream";
+
+	var provider = new FileExtensionContentTypeProvider();
+
+	if (!provider.TryGetContentType(filePath, out var contentType))
+	{
+		contentType = DefaultContentType;
+	}
+
+	return contentType;
+}
 
 //app.Urls.Add("http://localhost:4000");
 
