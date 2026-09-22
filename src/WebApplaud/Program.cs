@@ -71,10 +71,16 @@ foreach (var application in applications)
 		if ($"{localFolder}{file.Name}" == "appapi.js") continue;
 
 		var mimeType = GetMimeTypeForFileExtension(file.Extension);
+#if DEBUG
+		Console.WriteLine($"{basePath}{localFolder}{file.Name}");
+#endif
+		var downloadName = mimeType != "text/html" ? file.Name : null;
+		var lastModified = file.LastWriteTimeUtc;
+		var fullName = file.FullName;
 		app.MapGet($"{basePath}{localFolder}{file.Name}", () =>
 		{
-			var stream = File.OpenRead(file.FullName);
-			return Results.File(stream, contentType: mimeType, fileDownloadName: file.Name, enableRangeProcessing: true, lastModified: file.LastWriteTimeUtc);
+			var stream = File.OpenRead(fullName);
+			return Results.File(stream, contentType: mimeType, fileDownloadName: downloadName, enableRangeProcessing: true, lastModified: lastModified);
 		});
 	}
 
