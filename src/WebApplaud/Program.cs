@@ -215,10 +215,20 @@ static void InitializeAppApi(WebApplication app, Dictionary<string, string> file
 
 		return Results.NotFound();
 	});
-	app.MapPost($"settextcontext", ([FromQuery] string rootId, [FromQuery] string id, [FromBody] string content) =>
-	{
+	app.MapPost($"settextcontext", async ([FromQuery] string rootId, [FromQuery] string id, [FromBody] string content, CancellationToken cancellationToken) => {
+		if (folderRoots.TryGetValue(rootId, out var rootItem))
+		{
+			if (rootItem.Files.TryGetValue(id, out var fileItem))
+			{
+				var fullPath = Path.Combine(GlobalConfig.Path, fileItem.StartsWith('/') ? fileItem.Substring(1) : fileItem);
+				if (!File.Exists(fullPath)) return Results.Content("false", contentType: "application/json");
 
-		return Results.Content("true", contentType: "application/json");
+				await File.WriteAllTextAsync(fullPath, content, cancellationToken);
+				return Results.Content("true", contentType: "application/json");
+			}
+		}
+
+		return Results.Content("false", contentType: "application/json");
 	});
 }
 
