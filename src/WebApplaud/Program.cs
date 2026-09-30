@@ -32,6 +32,10 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
 	serverOptions.Limits.MaxConcurrentUpgradedConnections = 5000;
 });
 //builder.WebHost.UseSockets();
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+	options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
+});
 
 builder.Services.AddMemoryCache();
 builder.Services.AddOutputCache(a =>
@@ -124,19 +128,24 @@ static void InitializeApplications(WebApplication app, DirectoryInfo[] applicati
 static void IndexingUserFolders(Dictionary<string, string> fileIdentifiers, Dictionary<string, string> folderIdentifiers, Dictionary<string, FolderRootModel> folderRoots)
 {
 	var commonDirectory = new DirectoryInfo(Path.Combine(GlobalConfig.Path, "data/common"));
-	folderRoots.Add(Guid.NewGuid().ToString(), "data/common");
+	var root = new FolderRootModel { Path = "/data/common" };
+	folderRoots.Add(Guid.NewGuid().ToString(), root);
+	var lastFolderRoot = folderRoots.Last();
+	Console.WriteLine("Root: " + lastFolderRoot.Key + " " + lastFolderRoot.Value);
 
 	foreach (var directory in commonDirectory.EnumerateDirectories("*", SearchOption.AllDirectories))
 	{
-		folderIdentifiers.Add(Guid.NewGuid().ToString(), directory.FullName.Replace('\\', '/').Replace(GlobalConfig.Path, ""));
+		root.Folders.Add(Guid.NewGuid().ToString(), directory.FullName.Replace('\\', '/').Replace(GlobalConfig.Path, ""));
+		var last = root.Folders.Last();
+		Console.WriteLine("Folder: " + last.Key + " " + last.Value);
 	}
 	foreach (var file in commonDirectory.EnumerateFiles("*", SearchOption.AllDirectories))
 	{
-		fileIdentifiers.Add(Guid.NewGuid().ToString(), file.FullName.Replace('\\', '/').Replace(GlobalConfig.Path, ""));
+		root.Files.Add(Guid.NewGuid().ToString(), file.FullName.Replace('\\', '/').Replace(GlobalConfig.Path, ""));
 	}
 }
 
-static void InitializeAppApi(WebApplication app, Dictionary<string, string> fileIdentifiers, Dictionary<string, string> folderIdentifiers, Dictionary<string, string> folderRoots)
+static void InitializeAppApi(WebApplication app, Dictionary<string, string> fileIdentifiers, Dictionary<string, string> folderIdentifiers, Dictionary<string, FolderRootModel> folderRoots)
 {
 	app.MapGet($"folderroots", () =>
 	{
@@ -150,16 +159,43 @@ static void InitializeAppApi(WebApplication app, Dictionary<string, string> file
 			return Results.Content("[]", contentType: "application/json");
 		}
 	});
-	app.MapGet($"folderitems", ([FromQuery] string rootId, [FromQuery] string id) =>
+	app.MapGet($"folderitems", ([FromQuery] string rootId, [FromQuery] string? id = default) =>
 	{
-		if (fileIdentifiers.ContainsKey(id))
+		if (folderRoots.TryGetValue(rootId, out var rootItem))
 		{
-			return Results.File("/", contentType: "application/json");
+			var rootPath = rootItem.Path + "/";
+			//get root common folder
+			if (string.IsNullOrEmpty(id))
+			{
+				var files = rootItem.Files
+					.Where(a => a.Value.Replace(rootPath, "").IndexOf("/") == -1)
+					.Select(a => new FolderItemModel { Name = a.Value.Replace(rootPath, ""), Id = a.Key })
+					.ToArray();
+				var folders = rootItem.Folders
+					.Where(a => a.Value.Replace(rootPath, "").IndexOf("/") == -1)
+					.Select(a => new FolderItemModel { Name = a.Value.Replace(rootPath, ""), Id = a.Key })
+					.ToArray();
+				return Results.Json(new FolderItemsModel { Files = files, Folders = folders }, AppJsonSerializerContext.Default);
+			}
+			else
+			{
+				if (rootItem.Folders.TryGetValue(id, out var folderRoot))
+				{
+					var rootFolderPath = folderRoot + "/";
+					var files = rootItem.Files
+						.Where(a => a.Value.Replace(rootFolderPath, "").IndexOf("/") == -1)
+						.Select(a => new FolderItemModel { Name = a.Value.Replace(rootFolderPath, ""), Id = a.Key })
+						.ToArray();
+					var folders = rootItem.Folders
+						.Where(a => a.Value.Replace(rootFolderPath, "").IndexOf("/") == -1)
+						.Select(a => new FolderItemModel { Name = a.Value.Replace(rootFolderPath, ""), Id = a.Key })
+						.ToArray();
+					return Results.Json(new FolderItemsModel { Files = files, Folders = folders }, AppJsonSerializerContext.Default);
+				}
+			}
 		}
-		else
-		{
-			return Results.NotFound();
-		}
+
+		return Results.NotFound();
 	});
 	app.MapGet($"file", ([FromQuery] string rootId, [FromQuery] string id) =>
 	{
