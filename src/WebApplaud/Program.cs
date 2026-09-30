@@ -199,19 +199,21 @@ static void InitializeAppApi(WebApplication app, Dictionary<string, string> file
 	});
 	app.MapGet($"file", ([FromQuery] string rootId, [FromQuery] string id) =>
 	{
-		if (fileIdentifiers.ContainsKey(id))
+		if (folderRoots.TryGetValue(rootId, out var rootItem))
 		{
-			return Results.File("/", contentType: "plain/text");
-		}
-		else
-		{
-			return Results.NotFound();
-		}
-	});
-	app.MapGet($"gettextcontext", ([FromQuery] string rootId, [FromQuery] string id) =>
-	{
+			if (rootItem.Files.TryGetValue(id, out var fileItem))
+			{
+				var mimeType = GetMimeTypeForFileExtension(fileItem);
+				var fullPath = Path.Combine(GlobalConfig.Path, fileItem.StartsWith('/') ? fileItem.Substring(1) : fileItem);
+				var fileName = Path.GetFileName(fullPath);
+				if (!File.Exists(fullPath)) return Results.NotFound();
 
-		return Results.File([], contentType: "plain/text");
+				var stream = File.OpenRead(fullPath);
+				return Results.File(stream, contentType: mimeType, enableRangeProcessing: true, fileDownloadName: fileName);
+			}
+		}
+
+		return Results.NotFound();
 	});
 	app.MapPost($"settextcontext", ([FromQuery] string rootId, [FromQuery] string id, [FromBody] string content) =>
 	{
