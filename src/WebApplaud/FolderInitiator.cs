@@ -1,4 +1,5 @@
-﻿using WebApplaud.Models;
+﻿using Microsoft.AspNetCore.StaticFiles;
+using WebApplaud.Models;
 
 namespace WebApplaud
 {
@@ -96,5 +97,20 @@ namespace WebApplaud
 			//var userProfile = 
 		}*/
 
+		public static string GetMimeTypeForFileExtension(string filePath)
+		{
+			const string DefaultContentType = "application/octet-stream";
+
+			var provider = new FileExtensionContentTypeProvider();
+
+			if (!provider.TryGetContentType(filePath, out var contentType))
+			{
+				contentType = DefaultContentType;
+			}
+
+			return contentType;
+		}
+
 	}
+
 }
