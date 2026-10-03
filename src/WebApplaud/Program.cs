@@ -3,6 +3,7 @@ using System.Reflection;
 using WebApplaud;
 using WebApplaud.AppApis;
 using WebApplaud.Models;
+using WebApplaud.Pages;
 
 Version? version = Assembly.GetEntryAssembly()?.GetName().Version;
 string? fileVersion = version is not null ? $"{version.Major}.{version.Minor}.{version.Build}" : "";
@@ -72,7 +73,10 @@ IndexingUserFolders(folderRoots);
 
 InitializeApplications(app, applications, appIdentifiers);
 
+AppDrawer.Initialize();
+
 FolderApi.RegisterRoutes(app, folderRoots);
+AppDrawer.RegisterRoutes(app);
 
 //app.Urls.Add("http://localhost:4000");
 
