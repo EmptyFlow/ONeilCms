@@ -5,11 +5,23 @@
 	<title>App Drawer</title>
 </head>
 <body>
-	
+	<div id="list">
+
+	</div>
 	<script type="module">
-		const appsjson = '';
+		function init() {
+			let appsjson = '';
+			const list = document.getElementById('list');
+			if (!appsjson) return;
+	
+			const items = JSON.parse(appsjson);
 
-
+			for (const item of items) {
+				const listItem = document.createElement("div");
+				listItem.innerHTML = `<a href=''></span>`;
+				list.appendChild(listItem);
+			}
+		}		
 	</script>
 </body>
 </html>

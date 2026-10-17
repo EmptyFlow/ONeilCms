@@ -25,8 +25,11 @@ namespace WebApplaud.Pages
 
 		private static byte[] m_drawerTemplate = [];
 
+		private static string m_appsJson = "";
+
 		public static void Initialize() {
 			m_drawerTemplate = GetEmbeddedResources("AppDrawer.html");
+			m_appsJson = "";
 		}
 
 		public static void RegisterRoutes(WebApplication app, bool maskRoutes = false)
@@ -36,12 +39,15 @@ namespace WebApplaud.Pages
 				var content = Encoding.UTF8.GetString(m_drawerTemplate);
 
 				content = content
-					.Replace("const appsData = '';", "")
-					.Replace("<appsjson></appsjson>", "");
+					.Replace("let appsData = '';", $"let appsData = '{m_appsJson}';")
+					.Replace("<appsjson></appsjson>", $"<appsjson>{m_appsJson}</appsjson>");
 
 				return Results.Content(content, "text/html");
 			});
 		}
+
+		//Content-Security-Policy: base-uri 'self'; default-src 'self'; object-src 'none'; script-src 'self'; style-src *; img-src *; upgrade-insecure-requests 'self';
+		//connect-src https://host1.com https://host2.com
 
 	}
 }

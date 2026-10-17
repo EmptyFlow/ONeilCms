@@ -4,6 +4,8 @@
 	internal record UserProfile
 	{
 
+		public required string Id { get; set; } = "";
+
 		public string FirstName { get; init; } = "";
 
 		public string LastName { get; init; } = "";
