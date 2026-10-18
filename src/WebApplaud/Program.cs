@@ -71,6 +71,8 @@ var folderRoots = new Dictionary<string, FolderRootModel>();
 
 IndexingUserFolders(folderRoots);
 
+AppApis.Initialize(app);
+
 InitializeApplications(app, applications, appIdentifiers);
 
 AppDrawer.Initialize();
