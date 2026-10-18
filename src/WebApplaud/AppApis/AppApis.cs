@@ -10,6 +10,8 @@ namespace WebApplaud.AppApis
 
 		internal static string m_appFolder = "";
 
+		internal static Dictionary<string, string> m_routes = [];
+
 		internal static void Initialize(WebApplication app)
 		{
 			m_appFolder = Path.Combine(GlobalConfig.Path, "apps");
@@ -69,14 +71,19 @@ namespace WebApplaud.AppApis
 
 		internal static void RegisterRoutes(WebApplication app, bool maskRoutes = false)
 		{
-			app.MapGet($"apps", () =>
+			var appsRoute = maskRoutes ? "apps" : Guid.NewGuid().ToString().Replace("-", "");
+			m_routes.Add(appsRoute, "apps");
+			app.MapGet(appsRoute, () =>
 			{
 				var apps = m_apps
 					.Select(a => new AppDrawerModel { Title = a.Titles.FirstOrDefault().Value ?? "", Identifier = a.Id })
 					.ToList();
 				return Results.Json(apps, AppJsonSerializerContext.Default);
 			});
-			app.MapPost($"openapp", () =>
+
+			var openAppRoute = maskRoutes ? "openApp" : Guid.NewGuid().ToString().Replace("-", "");
+			m_routes.Add(openAppRoute, "openApp");
+			app.MapPost(openAppRoute, () =>
 			{
 				return Results.Content("/lala.html", contentType: "text/plain");
 			});

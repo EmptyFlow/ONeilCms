@@ -72,9 +72,6 @@ var folderRoots = new Dictionary<string, FolderRootModel>();
 IndexingUserFolders(folderRoots);
 
 AppApis.Initialize(app);
-
-InitializeApplications(app, applications, appIdentifiers);
-
 AppDrawer.Initialize();
 
 FolderApi.RegisterRoutes(app, folderRoots);
@@ -84,51 +81,6 @@ AppDrawer.RegisterRoutes(app);
 //app.Urls.Add("http://localhost:4000");
 
 app.Run();
-
-static void InitializeApplications(WebApplication app, DirectoryInfo[] applications, Dictionary<string, string> appIdentifiers)
-{
-	foreach (var application in applications)
-	{
-		var appName = application.Name;
-#if DEBUG
-		var id = "testdebugapp";
-#else
-	var id = Guid.NewGuid().ToString().Replace("-", "");
-#endif
-		appIdentifiers.Add(id, appName);
-
-		var basePath = $"{id}/";
-
-		foreach (var file in application.EnumerateFiles("*", SearchOption.AllDirectories))
-		{
-			var directory = file.DirectoryName ?? "";
-			var localFolder = directory.Replace(application.FullName, "").Replace("\\", "/");
-			if (localFolder.Length > 0)
-			{
-				if (localFolder.First() == '/') localFolder = localFolder.Substring(1);
-				if (localFolder.Last() != '/') localFolder = localFolder + '/';
-			}
-			//if ($"{localFolder}{file.Name}" == "appapi.js") continue;
-
-			var mimeType = GetMimeTypeForFileExtension(file.Extension);
-#if DEBUG
-			Console.WriteLine($"{basePath}{localFolder}{file.Name}");
-#endif
-			var downloadName = mimeType != "text/html" ? file.Name : null;
-			var lastModified = file.LastWriteTimeUtc;
-			var fullName = file.FullName;
-			app.MapGet($"{basePath}{localFolder}{file.Name}", () =>
-			{
-				var stream = File.OpenRead(fullName);
-				return Results.File(stream, contentType: mimeType, fileDownloadName: downloadName, enableRangeProcessing: true, lastModified: lastModified);
-			});
-			/*app.MapGet($"{basePath}appapi.js", () =>
-			{
-				return Results.File([], contentType: "application/json", fileDownloadName: "appapi.js");
-			});*/
-		}
-	}
-}
 
 static void IndexingUserFolders(Dictionary<string, FolderRootModel> folderRoots)
 {
