@@ -67,13 +67,13 @@ namespace WebApplaud.AppApis
 			}
 		}
 
-		internal static void RegisterRoutes(WebApplication app, Dictionary<string, string> appIdentifiers, bool maskRoutes = false)
+		internal static void RegisterRoutes(WebApplication app, bool maskRoutes = false)
 		{
 			app.MapGet($"apps", () =>
 			{
-				var apps = appIdentifiers
-					.Select(a => new AppManifestModel { Name = a.Value, Id = a.Key })
-					.ToArray();
+				var apps = m_apps
+					.Select(a => new AppDrawerModel { Title = a.Titles.FirstOrDefault().Value ?? "", Identifier = a.Id })
+					.ToList();
 				return Results.Json(apps, AppJsonSerializerContext.Default);
 			});
 			app.MapPost($"openapp", () =>

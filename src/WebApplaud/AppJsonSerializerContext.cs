@@ -6,6 +6,7 @@ namespace WebApplaud
 
 	[JsonSerializable(typeof(FolderItemsModel))]
 	[JsonSerializable(typeof(AppManifestModel))]
+	[JsonSerializable(typeof(List<AppDrawerModel>))]
 	[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 	internal partial class AppJsonSerializerContext : JsonSerializerContext
 	{

@@ -78,7 +78,7 @@ InitializeApplications(app, applications, appIdentifiers);
 AppDrawer.Initialize();
 
 FolderApi.RegisterRoutes(app, folderRoots);
-AppApis.RegisterRoutes(app, appIdentifiers);
+AppApis.RegisterRoutes(app);
 AppDrawer.RegisterRoutes(app);
 
 //app.Urls.Add("http://localhost:4000");
