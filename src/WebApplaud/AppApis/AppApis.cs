@@ -38,6 +38,7 @@ namespace WebApplaud.AppApis
 					Factors = manifestModel.Factors.ToArray(),
 					DownloadUrl = manifestModel.DownloadUrl,
 					ManifestUrl = manifestModel.ManifestUrl,
+					StartupPage = manifestModel.StartupPage,
 					Icon = manifestModel.Icon,
 				};
 
@@ -99,9 +100,12 @@ namespace WebApplaud.AppApis
 				var application = m_apps.FirstOrDefault(a => a.Id == app);
 				if (application is null) return Results.NotFound();
 
+				var applicationModel = m_apps.FirstOrDefault(a => a.LocalId == session.App);
+				if (applicationModel is null) return Results.NotFound();
+
 				session.App = application.LocalId;
 
-				return Results.Content("/lala.html", contentType: "text/plain");
+				return Results.Content($"/{applicationModel.LocalId}/{applicationModel.StartupPage}", contentType: "text/plain");
 			});
 		}
 

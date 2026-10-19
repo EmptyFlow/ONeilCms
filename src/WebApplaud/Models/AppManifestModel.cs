@@ -27,6 +27,9 @@ namespace WebApplaud.Models
 		[JsonPropertyName("title")]
 		public IDictionary<string, string> Titles { get; init; } = new Dictionary<string, string>();
 
+		[JsonPropertyName("startupPage")]
+		public string StartupPage { get; set; } = "";
+
 	}
 
 }

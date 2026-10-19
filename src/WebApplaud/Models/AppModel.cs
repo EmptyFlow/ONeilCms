@@ -14,6 +14,8 @@
 
 		public string DownloadUrl { get; set; } = "";
 
+		public string StartupPage { get; set; } = "";
+
 		public IEnumerable<string> Factors { get; set; } = Enumerable.Empty<string>();
 
 		public IEnumerable<string> Developers { get; set; } = Enumerable.Empty<string>();
