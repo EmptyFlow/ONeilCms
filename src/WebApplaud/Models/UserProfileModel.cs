@@ -1,7 +1,7 @@
 ﻿namespace WebApplaud.Models
 {
 
-	internal record UserProfile
+	internal record UserProfileModel
 	{
 
 		public required string Id { get; set; } = "";

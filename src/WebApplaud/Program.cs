@@ -101,18 +101,3 @@ static void IndexingUserFolders(Dictionary<string, FolderRootModel> folderRoots)
 		root.Files.Add(Guid.NewGuid().ToString(), file.FullName.Replace('\\', '/').Replace(GlobalConfig.Path, ""));
 	}
 }
-
-
-static string GetMimeTypeForFileExtension(string filePath)
-{
-	const string DefaultContentType = "application/octet-stream";
-
-	var provider = new FileExtensionContentTypeProvider();
-
-	if (!provider.TryGetContentType(filePath, out var contentType))
-	{
-		contentType = DefaultContentType;
-	}
-
-	return contentType;
-}

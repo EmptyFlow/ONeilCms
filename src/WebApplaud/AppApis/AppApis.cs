@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
+using WebApplaud.InnerApis;
 using WebApplaud.Models;
 
 namespace WebApplaud.AppApis
@@ -69,22 +71,36 @@ namespace WebApplaud.AppApis
 			}
 		}
 
+		internal static string AddRoute(string route, bool maskRoutes = false)
+		{
+			var registerRoute = maskRoutes ? route : Guid.NewGuid().ToString().Replace("-", "");
+			m_routes.Add(registerRoute, route);
+			return registerRoute;
+		}
+
 		internal static void RegisterRoutes(WebApplication app, bool maskRoutes = false)
 		{
-			var appsRoute = maskRoutes ? "apps" : Guid.NewGuid().ToString().Replace("-", "");
-			m_routes.Add(appsRoute, "apps");
-			app.MapGet(appsRoute, () =>
+			app.MapGet(AddRoute("apps", maskRoutes), (HttpContext httpContext) =>
 			{
+				var session = UserProfile.GetProfileFromSession(httpContext);
+				if (session is null) return Results.Unauthorized();
+
 				var apps = m_apps
 					.Select(a => new AppDrawerModel { Title = a.Titles.FirstOrDefault().Value ?? "", Identifier = a.Id })
 					.ToList();
 				return Results.Json(apps, AppJsonSerializerContext.Default);
 			});
 
-			var openAppRoute = maskRoutes ? "openApp" : Guid.NewGuid().ToString().Replace("-", "");
-			m_routes.Add(openAppRoute, "openApp");
-			app.MapPost(openAppRoute, () =>
+			app.MapPost(AddRoute("openApp", maskRoutes), (HttpContext httpContext, [FromQuery] string app) =>
 			{
+				var session = UserProfile.GetProfileFromSession(httpContext);
+				if (session is null) return Results.Unauthorized();
+
+				var application = m_apps.FirstOrDefault(a => a.Id == app);
+				if (application is null) return Results.NotFound();
+
+				session.App = application.LocalId;
+
 				return Results.Content("/lala.html", contentType: "text/plain");
 			});
 		}
