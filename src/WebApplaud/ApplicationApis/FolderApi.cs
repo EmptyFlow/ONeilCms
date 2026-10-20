@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebApplaud.Models;
 
-namespace WebApplaud.AppApis
+namespace WebApplaud.ApplicationApis
 {
 
 	public static class FolderApi

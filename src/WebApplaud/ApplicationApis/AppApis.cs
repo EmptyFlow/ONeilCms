@@ -3,7 +3,7 @@ using System.Text.Json;
 using WebApplaud.InnerApis;
 using WebApplaud.Models;
 
-namespace WebApplaud.AppApis
+namespace WebApplaud.ApplicationApis
 {
 	internal static class AppApis
 	{
@@ -123,6 +123,10 @@ namespace WebApplaud.AppApis
 			if (app is null) return "";
 
 			return app.Id;
+		}
+
+		internal static string GetDrawerApp() {
+			return "";
 		}
 
 	}
