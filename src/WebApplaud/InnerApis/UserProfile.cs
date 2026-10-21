@@ -10,11 +10,22 @@ namespace WebApplaud.InnerApis
 
 		internal static readonly Dictionary<string, UserSessionModel> m_sessions = [];
 
+		internal static readonly List<UserProfileModel> m_profiles = [];
+
 		internal static Dictionary<string, string> m_routes = [];
 
 		internal static void Initialize()
 		{
-			// read user profiles
+			//TODO: read real user profiles
+
+			m_profiles.Add(
+				new UserProfileModel
+				{
+					Id = "lalalalalal",
+					Login = "test",
+					Password = "test",
+				}
+			);
 		}
 
 		internal static string AddRoute(string route, bool maskRoutes = false)
@@ -28,9 +39,15 @@ namespace WebApplaud.InnerApis
 		{
 			app.MapPost(AddRoute("login", maskRoutes), (HttpContext httpContext) =>
 			{
-				var token = Guid.NewGuid().ToString();
-
 				var form = httpContext.Request.Form;
+				var login = form.ContainsKey("login") && form["login"].Any() ? form["login"].First() : "";
+				var password = form.ContainsKey("password") && form["password"].Any() ? form["password"].First() : "";
+				if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(password)) return Results.BadRequest();
+
+				var profile = m_profiles.FirstOrDefault(a => a.Login == login && a.Password == password);
+				if (profile is null) return Results.BadRequest();
+
+				var token = Guid.NewGuid().ToString();
 
 				CreateProfileCookie(httpContext, token);
 
@@ -40,16 +57,17 @@ namespace WebApplaud.InnerApis
 				{
 					App = drawerApp,
 					Expire = DateTime.UtcNow.AddDays(1),
-					Id = "111",
+					Id = profile.Id,
 					Token = token
 				};
-				
+
 
 				return Results.Redirect("");
 			});
 		}
 
-		internal static void CreateProfileCookie(HttpContext httpContext, string token) {
+		internal static void CreateProfileCookie(HttpContext httpContext, string token)
+		{
 			httpContext.Response.Cookies.Append("waut", token);
 			var cookieOptions = new CookieOptions()
 			{
