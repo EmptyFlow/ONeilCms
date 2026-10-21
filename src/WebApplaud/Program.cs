@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.StaticFiles;
 using System.Reflection;
 using WebApplaud;
-using WebApplaud.AppApis;
+using WebApplaud.ApplicationApis;
+using WebApplaud.InnerApis;
 using WebApplaud.Models;
 using WebApplaud.Pages;
 
@@ -71,12 +71,14 @@ var folderRoots = new Dictionary<string, FolderRootModel>();
 
 IndexingUserFolders(folderRoots);
 
+UserProfile.Initialize();
 AppApis.Initialize(app);
-AppDrawer.Initialize();
+LoginPage.Initialize();
 
+UserProfile.RegisterRoutes(app);
 FolderApi.RegisterRoutes(app, folderRoots);
 AppApis.RegisterRoutes(app);
-AppDrawer.RegisterRoutes(app);
+LoginPage.RegisterRoutes(app);
 
 //app.Urls.Add("http://localhost:4000");
 

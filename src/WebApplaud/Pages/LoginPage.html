@@ -1,0 +1,86 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Log in to your WebApplaud account</title>
+	<style>
+		@font-face {
+			font-family: "Roboto";
+			src: url("./Roboto.ttf") format("truetype");
+			font-weight: 400;
+			font-style: normal;
+			font-display: swap;
+		}
+
+		body {
+			font-family: "Roboto", Arial, sans-serif;
+			margin: 0;
+		}
+
+		.all-page-container {
+			width: 100vw;
+			height: 100vh;
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.form-container {
+			width: 300px;
+			display: flex;
+			flex-direction: column;
+			padding: 10px;
+			border: 1px solid rgb(233.66, 233.66, 233.66);
+			border-radius: 4px;
+		}
+		.form-header {
+			font-size: 22px;
+			height: 50px;
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			justify-content: center;
+		}
+		.form-label {
+			font-size: 17px;
+			margin-top: 4px;
+			margin-bottom: 4px;
+		}
+		.form-input {
+			font-size: 15px;
+			margin-bottom: 8px;
+		}
+		.form-button {
+			font-size: 17px;
+			font-weight: bold;
+			margin-top: 10px;
+		}
+	</style>
+</head>
+<body>
+	<div class="all-page-container">
+		<div id="form" class="form-container">
+			<div class="form-header"><span>Sign in to your account</span></div>
+			<span class="form-label">User Name</span>
+			<input class="form-input" type="text" value="" placeholder="Enter username" />
+			<span class="form-label">Password</span>
+			<input class="form-input" type="password" value="" placeholder="Enter your password" />
+			<button class="form-button" id="submitButton">Submit</button>
+		</div>
+	</div>
+
+	<script type="module">
+		function init() {
+			const form = document.getElementById('form');
+			const button = document.getElementById('submitButton');
+
+			button.addEventListener('click', formSubmit);
+		}
+
+		function formSubmit() {
+
+		}
+	</script>
+</body>
+</html>

@@ -20,7 +20,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Include="Pages\AppDrawer.html" />
+		<EmbeddedResource Include="Pages\LoginPage.html" />
+		<EmbeddedResource Include="Pages\Roboto.ttf" />
 	</ItemGroup>
 
 	<ItemGroup>

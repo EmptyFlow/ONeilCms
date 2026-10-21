@@ -25,6 +25,8 @@ namespace WebApplaud.ApplicationApis
 				var appName = application.Name;
 
 				var manifestPath = Path.Combine(m_appFolder, appName, "webapp.json");
+				if (!File.Exists(manifestPath)) continue;
+
 				var manifestJson = File.ReadAllText(manifestPath);
 				var manifestModel = JsonSerializer.Deserialize(manifestJson, AppJsonSerializerContext.Default.AppManifestModel);
 				if (manifestModel is null) continue;
