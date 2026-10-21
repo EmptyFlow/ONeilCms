@@ -34,6 +34,7 @@
 			border: 1px solid rgb(233.66, 233.66, 233.66);
 			border-radius: 4px;
 		}
+
 		.form-header {
 			font-size: 22px;
 			height: 50px;
@@ -42,15 +43,18 @@
 			align-items: center;
 			justify-content: center;
 		}
+
 		.form-label {
 			font-size: 17px;
 			margin-top: 4px;
 			margin-bottom: 4px;
 		}
+
 		.form-input {
 			font-size: 15px;
 			margin-bottom: 8px;
 		}
+
 		.form-button {
 			font-size: 17px;
 			font-weight: bold;
@@ -63,9 +67,9 @@
 		<div id="form" class="form-container">
 			<div class="form-header"><span>Sign in to your account</span></div>
 			<span class="form-label">User Name</span>
-			<input class="form-input" type="text" value="" placeholder="Enter username" />
+			<input id="username" class="form-input" type="text" value="" placeholder="Enter username" />
 			<span class="form-label">Password</span>
-			<input class="form-input" type="password" value="" placeholder="Enter your password" />
+			<input id="password" class="form-input" type="password" value="" placeholder="Enter your password" />
 			<button class="form-button" id="submitButton">Submit</button>
 		</div>
 	</div>
@@ -78,9 +82,24 @@
 			button.addEventListener('click', formSubmit);
 		}
 
-		function formSubmit() {
+		async function formSubmit() {
+			const userName = document.getElementById('username');
+			const password = document.getElementById('password');
+			const login = userName.value;
+			const pass = password.value;
 
+			if (!login || !pass) return;
+
+			const formData = new FormData();
+			formData.append("login", login);
+			formData.append("password", pass);
+			const response = await fetch("/login", {
+				method: "POST",
+				body: formData
+			});
 		}
+
+		init();
 	</script>
 </body>
 </html>

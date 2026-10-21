@@ -12,23 +12,25 @@ namespace WebApplaud.InnerApis
 
 		internal static Dictionary<string, string> m_routes = [];
 
-		internal static void Initialize(WebApplication app)
+		internal static void Initialize()
 		{
 			// read user profiles
 		}
 
 		internal static string AddRoute(string route, bool maskRoutes = false)
 		{
-			var registerRoute = maskRoutes ? route : Guid.NewGuid().ToString().Replace("-", "");
+			var registerRoute = maskRoutes ? Guid.NewGuid().ToString().Replace("-", "") : route;
 			m_routes.Add(registerRoute, route);
 			return registerRoute;
 		}
 
 		internal static void RegisterRoutes(WebApplication app, bool maskRoutes = false)
 		{
-			app.MapPost(AddRoute("login", maskRoutes), (HttpContext httpContext, [FromQuery]string login, [FromQuery] string password) =>
+			app.MapPost(AddRoute("login", maskRoutes), (HttpContext httpContext) =>
 			{
 				var token = Guid.NewGuid().ToString();
+
+				var form = httpContext.Request.Form;
 
 				CreateProfileCookie(httpContext, token);
 
@@ -38,7 +40,7 @@ namespace WebApplaud.InnerApis
 				{
 					App = drawerApp,
 					Expire = DateTime.UtcNow.AddDays(1),
-					Id = "",
+					Id = "111",
 					Token = token
 				};
 				

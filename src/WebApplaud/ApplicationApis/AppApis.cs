@@ -76,7 +76,7 @@ namespace WebApplaud.ApplicationApis
 
 		internal static string AddRoute(string route, bool maskRoutes = false)
 		{
-			var registerRoute = maskRoutes ? route : Guid.NewGuid().ToString().Replace("-", "");
+			var registerRoute = maskRoutes ? Guid.NewGuid().ToString().Replace("-", "") : route;
 			m_routes.Add(registerRoute, route);
 			return registerRoute;
 		}
