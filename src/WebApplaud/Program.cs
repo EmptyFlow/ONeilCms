@@ -1,9 +1,12 @@
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using WebApplaud;
 using WebApplaud.ApplicationApis;
 using WebApplaud.InnerApis;
 using WebApplaud.Models;
 using WebApplaud.Pages;
+
+[assembly: InternalsVisibleToAttribute("WebApplaudTests")]
 
 Version? version = Assembly.GetEntryAssembly()?.GetName().Version;
 string? fileVersion = version is not null ? $"{version.Major}.{version.Minor}.{version.Build}" : "";
