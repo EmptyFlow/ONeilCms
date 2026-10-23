@@ -96,6 +96,66 @@ namespace WebApplaudTests
 			Assert.Equals(valueItem.IsType(KeyValueType.String), true);
 		}
 
+		[Test]
+		public void AsString_Completed_Case1()
+		{
+			//arrange
+			var valueItem = new KeyValueItem("name", "\"lalal 🥰\"");
+
+			//assert
+			Assert.Equals(valueItem.AsString(), "lalal 🥰");
+		}
+
+		[Test]
+		public void AsString_Failed_Case1()
+		{
+			//arrange
+			var valueItem = new KeyValueItem("name", "1");
+
+			//assert
+			Assert.Equals(valueItem.AsString(), "");
+		}
+
+		[Test]
+		public void AsString_Failed_Case2()
+		{
+			//arrange
+			var valueItem = new KeyValueItem("name", "\"");
+
+			//assert
+			Assert.Equals(valueItem.AsString(), "");
+		}
+
+		[Test]
+		public void AsInteger_Completed_Case1()
+		{
+			//arrange
+			var valueItem = new KeyValueItem("name", "55678");
+
+			//assert
+			Assert.Equals(valueItem.AsInteger(), 55678);
+		}
+
+		[Test]
+		public void AsInteger_Failed_Case1()
+		{
+			//arrange
+			var valueItem = new KeyValueItem("name", "55678.");
+
+			//assert
+			Assert.Equals(valueItem.AsInteger(), 0);
+		}
+
+		[Test]
+		public void AsInteger_Failed_Case2()
+		{
+			//arrange
+			var valueItem = new KeyValueItem("name", "55-6)78");
+
+			//assert
+			Assert.Equals(valueItem.AsInteger(), 0);
+		}
+
 
 	}
 

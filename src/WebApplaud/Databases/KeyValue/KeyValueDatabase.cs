@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-
-namespace WebApplaud.Databases.KeyValue
+﻿namespace WebApplaud.Databases.KeyValue
 {
 
 	internal enum KeyValueType
@@ -46,7 +44,8 @@ namespace WebApplaud.Databases.KeyValue
 
 		internal string AsString()
 		{
-			if (m_content.Length <= 2) return "";
+			if (m_type != KeyValueType.String) return string.Empty;
+			if (m_content.Length <= 2) return string.Empty;
 
 			return m_content[..^1].Substring(1);
 		}
