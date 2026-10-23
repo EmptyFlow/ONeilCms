@@ -45,6 +45,8 @@
 
 		internal double AsDouble() => m_type == KeyValueType.Double ? double.Parse(m_content) : 0.0;
 
+		public override string ToString() => $"{m_name} {m_content}";
+
 	}
 
 }
