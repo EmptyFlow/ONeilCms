@@ -156,6 +156,45 @@ namespace WebApplaudTests
 			Assert.Equals(valueItem.AsInteger(), 0);
 		}
 
+		[Test]
+		public void AsDouble_Completed_Case1()
+		{
+			//arrange
+			var valueItem = new KeyValueItem("name", "78.01");
+
+			//assert
+			Assert.Equals(valueItem.AsDouble(), 78.01);
+		}
+
+		[Test]
+		public void AsDouble_Completed_Case2()
+		{
+			//arrange
+			var valueItem = new KeyValueItem("name", "78");
+
+			//assert
+			Assert.Equals(valueItem.AsDouble(), 78.0);
+		}
+
+		[Test]
+		public void AsDouble_Failed_Case1()
+		{
+			//arrange
+			var valueItem = new KeyValueItem("name", "78.");
+
+			//assert
+			Assert.Equals(valueItem.AsDouble(), 0);
+		}
+
+		[Test]
+		public void AsDouble_Failed_Case2()
+		{
+			//arrange
+			var valueItem = new KeyValueItem("name", "%hg()78.");
+
+			//assert
+			Assert.Equals(valueItem.AsDouble(), 0);
+		}
 
 	}
 
