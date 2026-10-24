@@ -34,6 +34,27 @@
 
 		internal bool IsNull(string name) => !m_keys.ContainsKey(name);
 
+		internal string GetString(string name)
+		{
+			if (!m_keys.TryGetValue(name, out KeyValueItem? value)) return "";
+
+			return value.AsString();
+		}
+
+		internal int GetInteger(string name)
+		{
+			if (!m_keys.TryGetValue(name, out KeyValueItem? value)) return 0;
+
+			return value.AsInteger();
+		}
+
+		internal double GetDouble(string name)
+		{
+			if (!m_keys.TryGetValue(name, out KeyValueItem? value)) return 0.0;
+
+			return value.AsDouble();
+		}
+
 		internal void SetString(string name, string value)
 		{
 			if (!m_keys.ContainsKey(name))
