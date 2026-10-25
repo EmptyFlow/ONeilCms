@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WebApplaud.InnerApis;
 using WebApplaud.Models;
 
 namespace WebApplaud.ApplicationApis
@@ -9,8 +10,11 @@ namespace WebApplaud.ApplicationApis
 
 		public static void RegisterRoutes(WebApplication app, Dictionary<string, FolderRootModel> folderRoots, bool maskRoutes = false)
 		{
-			app.MapGet($"folderroots", () =>
+			app.MapGet($"folderroots", (HttpContext httpContext) =>
 			{
+				var session = UserProfile.GetProfileFromSession(httpContext);
+				if (session is null) return Results.Unauthorized();
+
 				if (folderRoots.Count != 0)
 				{
 					var roots = string.Join(',', folderRoots.Keys.Select(a => $"\"{a}\""));
@@ -21,8 +25,11 @@ namespace WebApplaud.ApplicationApis
 					return Results.Content("[]", contentType: "application/json");
 				}
 			});
-			app.MapGet($"folderitems", ([FromQuery] string rootId, [FromQuery] string? id = default) =>
+			app.MapGet($"folderitems", (HttpContext httpContext, [FromQuery] string rootId, [FromQuery] string? id = default) =>
 			{
+				var session = UserProfile.GetProfileFromSession(httpContext);
+				if (session is null) return Results.Unauthorized();
+
 				if (folderRoots.TryGetValue(rootId, out var rootItem))
 				{
 					var rootPath = rootItem.Path + "/";
@@ -59,8 +66,11 @@ namespace WebApplaud.ApplicationApis
 
 				return Results.NotFound();
 			});
-			app.MapGet($"file", ([FromQuery] string rootId, [FromQuery] string id) =>
+			app.MapGet($"file", (HttpContext httpContext, [FromQuery] string rootId, [FromQuery] string id) =>
 			{
+				var session = UserProfile.GetProfileFromSession(httpContext);
+				if (session is null) return Results.Unauthorized();
+
 				if (folderRoots.TryGetValue(rootId, out var rootItem))
 				{
 					if (rootItem.Files.TryGetValue(id, out var fileItem))
@@ -77,7 +87,10 @@ namespace WebApplaud.ApplicationApis
 
 				return Results.NotFound();
 			});
-			app.MapPost($"settextcontext", async ([FromQuery] string rootId, [FromQuery] string id, [FromBody] string content, CancellationToken cancellationToken) => {
+			app.MapPost($"settextcontext", async (HttpContext httpContext, [FromQuery] string rootId, [FromQuery] string id, [FromBody] string content, CancellationToken cancellationToken) => {
+				var session = UserProfile.GetProfileFromSession(httpContext);
+				if (session is null) return Results.Unauthorized();
+
 				if (folderRoots.TryGetValue(rootId, out var rootItem))
 				{
 					if (rootItem.Files.TryGetValue(id, out var fileItem))

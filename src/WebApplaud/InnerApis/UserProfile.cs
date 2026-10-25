@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using WebApplaud.ApplicationApis;
+﻿using WebApplaud.ApplicationApis;
 using WebApplaud.Models;
 
 namespace WebApplaud.InnerApis
@@ -23,7 +22,7 @@ namespace WebApplaud.InnerApis
 				{
 					Id = "lalalalalal",
 					Login = "test",
-					Password = "test",
+					Password = HashPassword.Hash("lala"),
 				}
 			);
 		}
@@ -43,6 +42,8 @@ namespace WebApplaud.InnerApis
 				var login = form.ContainsKey("login") && form["login"].Any() ? form["login"].First() : "";
 				var password = form.ContainsKey("password") && form["password"].Any() ? form["password"].First() : "";
 				if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(password)) return Results.BadRequest();
+
+				password = HashPassword.Hash(password); // hash password
 
 				var profile = m_profiles.FirstOrDefault(a => a.Login == login && a.Password == password);
 				if (profile is null) return Results.BadRequest();
@@ -68,7 +69,6 @@ namespace WebApplaud.InnerApis
 
 		internal static void CreateProfileCookie(HttpContext httpContext, string token)
 		{
-			httpContext.Response.Cookies.Append("waut", token);
 			var cookieOptions = new CookieOptions()
 			{
 				IsEssential = true,

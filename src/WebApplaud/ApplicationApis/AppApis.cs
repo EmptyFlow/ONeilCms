@@ -43,6 +43,7 @@ namespace WebApplaud.ApplicationApis
 					StartupPage = manifestModel.StartupPage,
 					Icon = manifestModel.Icon,
 				};
+				m_apps.Add(appmodel);
 
 				var basePath = $"{appmodel.LocalId}/";
 
