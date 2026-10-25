@@ -106,5 +106,119 @@ doublevalue 4546.0908
 			Assert.Equals(value, 4546.0908);
 		}
 
+		[Test]
+		public async Task LoadData_Completed_SetString()
+		{
+			//arrange
+			var database = new KeyValueDatabase();
+			var path = "LoadData_Completed_SetString.kv";
+			if (File.Exists(path)) File.Delete(path);
+
+			await File.WriteAllTextAsync(
+				path,
+"""
+test1 "lalalala pruha bruha muhaha 😘"
+digitvalue 12343
+doublevalue 4546.0908
+"""
+			);
+
+			//act
+			await database.LoadData(path);
+			database.SetString("test1", "blablabla");
+			var newValue = database.GetString("test1");
+
+			//assert
+			Assert.Equals(newValue, "blablabla");
+		}
+
+		[Test]
+		public async Task LoadData_Completed_SetInteger()
+		{
+			//arrange
+			var database = new KeyValueDatabase();
+			var path = "LoadData_Completed_SetInteger.kv";
+			if (File.Exists(path)) File.Delete(path);
+
+			await File.WriteAllTextAsync(
+				path,
+"""
+test1 "lalalala pruha bruha muhaha 😘"
+digitvalue 12343
+doublevalue 4546.0908
+"""
+			);
+
+			//act
+			await database.LoadData(path);
+			database.SetInteger("digitvalue", 4676);
+			var newValue = database.GetInteger("digitvalue");
+
+			//assert
+			Assert.Equals(newValue, 4676);
+		}
+
+		[Test]
+		public async Task LoadData_Completed_SetDouble()
+		{
+			//arrange
+			var database = new KeyValueDatabase();
+			var path = "LoadData_Completed_SetDouble.kv";
+			if (File.Exists(path)) File.Delete(path);
+
+			await File.WriteAllTextAsync(
+				path,
+"""
+test1 "lalalala pruha bruha muhaha 😘"
+digitvalue 12343
+doublevalue 4546.0908
+"""
+			);
+
+			//act
+			await database.LoadData(path);
+			database.SetDouble("doublevalue", 123.456);
+			var newValue = database.GetString("doublevalue");
+
+			//assert
+			Assert.Equals(newValue, 123.456);
+		}
+
+		[Test]
+		public async Task LoadData_Completed_SaveData()
+		{
+			//arrange
+			var database = new KeyValueDatabase();
+			var path = "LoadData_Completed_SaveData.kv";
+			if (File.Exists(path)) File.Delete(path);
+
+			await File.WriteAllTextAsync(
+				path,
+"""
+test1 "lalalala pruha bruha muhaha 😘"
+digitvalue 12343
+doublevalue 4546.0908
+"""
+			);
+
+			//act
+			await database.LoadData(path);
+			database.SetDouble("doublevalue", 489.02);
+			database.SetString("test1", "blablablab");
+			database.SetInteger("digitvalue", 123456);
+			await database.SaveData();
+
+			await database.LoadData(path);
+			var stringValue = database.GetString("test1");
+			var digitValue = database.GetInteger("digitvalue");
+			var doubleValue = database.GetDouble("doublevalue");
+
+			//assert
+			Assert.Equals(stringValue, "blablablab");
+			Assert.Equals(digitValue, 123456);
+			Assert.Equals(doubleValue, 489.02);
+		}
+
 	}
+
 }

@@ -14,6 +14,8 @@
 
 		public async Task LoadData(string path)
 		{
+			if (m_keys.Any()) m_keys.Clear();
+
 			await foreach (var line in File.ReadLinesAsync(path))
 			{
 				var firstSpaceIndex = line.IndexOf(' ');
@@ -64,6 +66,28 @@
 			}
 
 			m_keys[name] = new KeyValueItem(name, $"\"{value}\"");
+		}
+
+		internal void SetInteger(string name, int value)
+		{
+			if (!m_keys.ContainsKey(name))
+			{
+				m_keys.Add(name, new KeyValueItem(name, $"{value}"));
+				return;
+			}
+
+			m_keys[name] = new KeyValueItem(name, $"{value}");
+		}
+
+		internal void SetDouble(string name, double value)
+		{
+			if (!m_keys.ContainsKey(name))
+			{
+				m_keys.Add(name, new KeyValueItem(name, $"{value}"));
+				return;
+			}
+
+			m_keys[name] = new KeyValueItem(name, $"{value}");
 		}
 
 	}
