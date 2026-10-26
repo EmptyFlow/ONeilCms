@@ -24,7 +24,7 @@ doublevalue 4546.0908
 			);
 
 			//act
-			await database.LoadData(path);
+			await database.LoadDatabase(path);
 			var muhahaNull = database.IsNull("muhaha");
 
 			//assert
@@ -49,7 +49,7 @@ doublevalue 4546.0908
 			);
 
 			//act
-			await database.LoadData(path);
+			await database.LoadDatabase(path);
 			var value = database.GetString("test1");
 
 			//assert
@@ -74,7 +74,7 @@ doublevalue 4546.0908
 			);
 
 			//act
-			await database.LoadData(path);
+			await database.LoadDatabase(path);
 			var value = database.GetInteger("digitvalue");
 
 			//assert
@@ -99,7 +99,7 @@ doublevalue 4546.0908
 			);
 
 			//act
-			await database.LoadData(path);
+			await database.LoadDatabase(path);
 			var value = database.GetDouble("doublevalue");
 
 			//assert
@@ -124,7 +124,7 @@ doublevalue 4546.0908
 			);
 
 			//act
-			await database.LoadData(path);
+			await database.LoadDatabase(path);
 			database.SetString("test1", "blablabla");
 			var newValue = database.GetString("test1");
 
@@ -150,7 +150,7 @@ doublevalue 4546.0908
 			);
 
 			//act
-			await database.LoadData(path);
+			await database.LoadDatabase(path);
 			database.SetInteger("digitvalue", 4676);
 			var newValue = database.GetInteger("digitvalue");
 
@@ -176,7 +176,7 @@ doublevalue 4546.0908
 			);
 
 			//act
-			await database.LoadData(path);
+			await database.LoadDatabase(path);
 			database.SetDouble("doublevalue", 123.456);
 			var newValue = database.GetString("doublevalue");
 
@@ -202,13 +202,13 @@ doublevalue 4546.0908
 			);
 
 			//act
-			await database.LoadData(path);
+			await database.LoadDatabase(path);
 			database.SetDouble("doublevalue", 489.02);
 			database.SetString("test1", "blablablab");
 			database.SetInteger("digitvalue", 123456);
 			await database.SaveData();
 
-			await database.LoadData(path);
+			await database.LoadDatabase(path);
 			var stringValue = database.GetString("test1");
 			var digitValue = database.GetInteger("digitvalue");
 			var doubleValue = database.GetDouble("doublevalue");

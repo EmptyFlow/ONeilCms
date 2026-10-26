@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using WebApplaud.Databases.KeyValue;
 using WebApplaud.InnerApis;
 using WebApplaud.Models;
 
@@ -14,7 +15,11 @@ namespace WebApplaud.ApplicationApis
 
 		internal static Dictionary<string, string> m_routes = [];
 
-		internal static void Initialize(WebApplication app)
+		internal static KeyValueDatabase m_appsSettings = new KeyValueDatabase();
+
+		internal static string m_defaultAppId = "";
+
+		internal static async Task Initialize(WebApplication app)
 		{
 			m_appFolder = Path.Combine(GlobalConfig.Path, "apps");
 			var appDirectory = new DirectoryInfo(m_appFolder);
@@ -72,6 +77,18 @@ namespace WebApplaud.ApplicationApis
 					});
 				}
 			}
+
+			var settingsFolder = Path.Combine(GlobalConfig.Path, "settings", "apps.kvdb");
+			await m_appsSettings.LoadDatabase(settingsFolder);
+			var defautlApp = m_appsSettings.GetString("defaultapp");
+			if (string.IsNullOrEmpty(defautlApp) || !m_apps.Any(a => a.Id == defautlApp))
+			{
+				m_defaultAppId = m_apps.First().Id;
+			}
+			else
+			{
+				m_defaultAppId = defautlApp;
+			}
 		}
 
 		internal static string AddRoute(string route, bool maskRoutes = false)
@@ -127,10 +144,8 @@ namespace WebApplaud.ApplicationApis
 			return app.Id;
 		}
 
-		internal static AppModel GetDrawerApp()
-		{
-			return m_apps.First();
-		}
+		internal static AppModel GetDrawerApp() => m_apps.First(a => a.Id == m_defaultAppId);
 
 	}
+
 }

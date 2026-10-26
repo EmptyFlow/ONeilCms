@@ -75,8 +75,8 @@ var folderRoots = new Dictionary<string, FolderRootModel>();
 
 IndexingUserFolders(folderRoots);
 
+await AppApis.Initialize(app);
 UserProfile.Initialize();
-AppApis.Initialize(app);
 LoginPage.Initialize();
 
 UserProfile.RegisterRoutes(app);

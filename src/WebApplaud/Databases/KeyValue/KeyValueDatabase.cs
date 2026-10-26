@@ -12,16 +12,18 @@
 		{
 		}
 
-		public async Task LoadData(string path)
+		public async Task LoadDatabase(string path)
 		{
 			if (m_keys.Any()) m_keys.Clear();
+
+			if (!File.Exists(path)) await File.WriteAllTextAsync(path, "");
 
 			await foreach (var line in File.ReadLinesAsync(path))
 			{
 				var firstSpaceIndex = line.IndexOf(' ');
 				if (firstSpaceIndex == -1) continue;
 
-				var name = line.Substring(0, firstSpaceIndex - 1);
+				var name = line.Substring(0, firstSpaceIndex);
 				if (m_keys.ContainsKey(name)) continue;
 
 				m_keys.Add(name, new KeyValueItem(name, line.Substring(firstSpaceIndex + 1)));
@@ -35,6 +37,8 @@
 		}
 
 		internal bool IsNull(string name) => !m_keys.ContainsKey(name);
+
+		internal bool IsNotNull(string name) => m_keys.ContainsKey(name);
 
 		internal string GetString(string name)
 		{
