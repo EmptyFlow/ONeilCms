@@ -36,35 +36,37 @@ namespace WebApplaud.InnerApis
 
 		internal static void RegisterRoutes(WebApplication app, bool maskRoutes = false)
 		{
-			app.MapPost(AddRoute("login", maskRoutes), (HttpContext httpContext) =>
-			{
-				var form = httpContext.Request.Form;
-				var login = form.ContainsKey("login") && form["login"].Any() ? form["login"].First() : "";
-				var password = form.ContainsKey("password") && form["password"].Any() ? form["password"].First() : "";
-				if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(password)) return Results.BadRequest();
-
-				password = HashPassword.Hash(password); // hash password
-
-				var profile = m_profiles.FirstOrDefault(a => a.Login == login && a.Password == password);
-				if (profile is null) return Results.BadRequest();
-
-				var token = Guid.NewGuid().ToString();
-
-				CreateProfileCookie(httpContext, token);
-
-				var drawerApp = AppApis.GetDrawerApp();
-
-				var session = new UserSessionModel
+			app.MapPost(
+				AddRoute("login", maskRoutes), (HttpContext httpContext) =>
 				{
-					App = drawerApp,
-					Expire = DateTime.UtcNow.AddDays(1),
-					Id = profile.Id,
-					Token = token
-				};
+					var form = httpContext.Request.Form;
+					var login = form.ContainsKey("login") && form["login"].Any() ? form["login"].First() : "";
+					var password = form.ContainsKey("password") && form["password"].Any() ? form["password"].First() : "";
+					if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(password)) return Results.BadRequest();
 
+					password = HashPassword.Hash(password); // hash password
 
-				return Results.Redirect("");
-			});
+					var profile = m_profiles.FirstOrDefault(a => a.Login == login && a.Password == password);
+					if (profile is null) return Results.BadRequest();
+
+					var token = Guid.NewGuid().ToString();
+
+					CreateProfileCookie(httpContext, token);
+
+					var drawerApp = AppApis.GetDrawerApp();
+
+					var session = new UserSessionModel
+					{
+						App = drawerApp.LocalId,
+						Expire = DateTime.UtcNow.AddDays(1),
+						Id = profile.Id,
+						Token = token
+					};
+
+					return Results.Redirect($"/{drawerApp.LocalId}/{drawerApp.StartupPage}");
+				}
+			)
+			.RequireRateLimiting("login");
 		}
 
 		internal static void CreateProfileCookie(HttpContext httpContext, string token)

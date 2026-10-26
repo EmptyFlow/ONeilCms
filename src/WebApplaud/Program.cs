@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.RateLimiting;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading.RateLimiting;
 using WebApplaud;
 using WebApplaud.ApplicationApis;
 using WebApplaud.InnerApis;
@@ -40,20 +42,19 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 {
 	options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
 });
+builder.Services.AddRateLimiter(options =>
+{
+	options.AddFixedWindowLimiter("login", options =>
+	{
+		options.Window = TimeSpan.FromSeconds(20);
+		options.PermitLimit = 4;
+		options.QueueLimit = 2;
+		options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+	});
+});
 
 builder.Services.AddMemoryCache();
-builder.Services.AddOutputCache(a =>
-{
-	// max body 2 Mb
-	a.MaximumBodySize = 2 * 1024 * 1024;
-	// size of storage 50 Mb
-	a.SizeLimit = 50 * 1024 * 1024;
-	a.DefaultExpirationTimeSpan = TimeSpan.FromMinutes(5);
-});
 builder.Services.AddResponseCaching();
-
-//Dependencies.Resolve(builder.Services);
-
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
@@ -63,9 +64,9 @@ if (app.Environment.IsDevelopment()) app.MapOpenApi();
 
 if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection();
 
-app.UseOutputCache();
 app.UseResponseCaching();
 app.UseRouting();
+app.UseRateLimiter();
 
 var appsDirectory = new DirectoryInfo(Path.Combine(GlobalConfig.Path, "apps"));
 var applications = appsDirectory.GetDirectories();

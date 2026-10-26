@@ -127,9 +127,9 @@ namespace WebApplaud.ApplicationApis
 			return app.Id;
 		}
 
-		internal static string GetDrawerApp()
+		internal static AppModel GetDrawerApp()
 		{
-			return m_apps.First().LocalId;
+			return m_apps.First();
 		}
 
 	}
