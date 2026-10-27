@@ -22,7 +22,9 @@ namespace WebApplaudTests
 			//assert
 			Assert.Throws<ArgumentNullException>(() => {
 				//act and arrange
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
 				var valueItem = new KeyValueItem(null, "1");
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 			});
 		}
 
@@ -32,7 +34,9 @@ namespace WebApplaudTests
 			//assert
 			Assert.Throws<ArgumentNullException>(() => {
 				//act and arrange
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
 				var valueItem = new KeyValueItem("name", null);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 			});
 		}
 

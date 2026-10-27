@@ -1,4 +1,6 @@
-﻿namespace WebApplaud.Databases.KeyValue
+﻿using System.Collections.Concurrent;
+
+namespace WebApplaud.Databases.KeyValue
 {
 
 	internal class KeyValueDatabase
@@ -6,7 +8,7 @@
 
 		private string m_loadedPath = "";
 
-		private readonly Dictionary<string, KeyValueItem> m_keys = [];
+		private readonly ConcurrentDictionary<string, KeyValueItem> m_keys = [];
 
 		public KeyValueDatabase()
 		{
@@ -26,7 +28,7 @@
 				var name = line.Substring(0, firstSpaceIndex);
 				if (m_keys.ContainsKey(name)) continue;
 
-				m_keys.Add(name, new KeyValueItem(name, line.Substring(firstSpaceIndex + 1)));
+				m_keys.TryAdd(name, new KeyValueItem(name, line.Substring(firstSpaceIndex + 1)));
 			}
 			m_loadedPath = path;
 		}
@@ -39,6 +41,8 @@
 		internal bool IsNull(string name) => !m_keys.ContainsKey(name);
 
 		internal bool IsNotNull(string name) => m_keys.ContainsKey(name);
+
+		internal IEnumerable<string> GetKeys() => m_keys.Keys;
 
 		internal string GetString(string name)
 		{
@@ -65,7 +69,7 @@
 		{
 			if (!m_keys.ContainsKey(name))
 			{
-				m_keys.Add(name, new KeyValueItem(name, $"\"{value}\""));
+				m_keys.TryAdd(name, new KeyValueItem(name, $"\"{value}\""));
 				return;
 			}
 
@@ -76,7 +80,7 @@
 		{
 			if (!m_keys.ContainsKey(name))
 			{
-				m_keys.Add(name, new KeyValueItem(name, $"{value}"));
+				m_keys.TryAdd(name, new KeyValueItem(name, $"{value}"));
 				return;
 			}
 
@@ -87,7 +91,7 @@
 		{
 			if (!m_keys.ContainsKey(name))
 			{
-				m_keys.Add(name, new KeyValueItem(name, $"{value}"));
+				m_keys.TryAdd(name, new KeyValueItem(name, $"{value}"));
 				return;
 			}
 

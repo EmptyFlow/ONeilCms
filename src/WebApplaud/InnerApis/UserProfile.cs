@@ -1,4 +1,6 @@
-﻿using WebApplaud.ApplicationApis;
+﻿using System.Text.Json;
+using WebApplaud.ApplicationApis;
+using WebApplaud.Databases.KeyValue;
 using WebApplaud.Models;
 
 namespace WebApplaud.InnerApis
@@ -13,18 +15,28 @@ namespace WebApplaud.InnerApis
 
 		internal static Dictionary<string, string> m_routes = [];
 
-		internal static void Initialize()
-		{
-			//TODO: read real user profiles
+		internal static KeyValueDatabase m_profilesDatabase = new KeyValueDatabase();
 
-			m_profiles.Add(
-				new UserProfileModel
-				{
-					Id = "lalalalalal",
-					Login = "test",
-					Password = HashPassword.Hash("lala"),
-				}
-			);
+		internal static KeyValueDatabase m_sessionDatabase = new KeyValueDatabase();
+
+		async internal static Task Initialize()
+		{
+			var profilesFile = Path.Combine(GlobalConfig.Path, "settings", "profiles.kvdb");
+			await m_profilesDatabase.LoadDatabase(profilesFile);
+
+			var sessionsFile = Path.Combine(GlobalConfig.Path, "settings", "sessions.kvdb");
+			await m_sessionDatabase.LoadDatabase(sessionsFile);
+
+			var keys = m_profilesDatabase.GetKeys();
+
+			foreach (var key in keys)
+			{
+				var model = m_profilesDatabase.GetString(key);
+				UserProfileModel? userProfile = JsonSerializer.Deserialize(model, AppJsonSerializerContext.Default.UserProfileModel);
+				if (userProfile is null) continue;
+
+				m_profiles.Add(userProfile);
+			}
 		}
 
 		internal static string AddRoute(string route, bool maskRoutes = false)

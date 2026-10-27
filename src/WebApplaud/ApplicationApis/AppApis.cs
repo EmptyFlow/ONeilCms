@@ -63,7 +63,8 @@ namespace WebApplaud.ApplicationApis
 						if (localFolder.Last() != '/') localFolder = localFolder + '/';
 					}
 					var mimeType = FolderInitiator.GetMimeTypeForFileExtension(file.Extension);
-					var downloadName = mimeType != "text/html" ? file.Name : null;
+					var isHtml = mimeType.ToLowerInvariant() == "text/html";
+					var downloadName = !isHtml ? file.Name : null;
 					var lastModified = file.LastWriteTimeUtc;
 					var fullName = file.FullName;
 					app.MapGet($"{basePath}{localFolder}{file.Name}", (HttpContext httpContext) =>
