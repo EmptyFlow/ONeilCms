@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Collections.Concurrent;
+using System.Text.Json;
 using WebApplaud.ApplicationApis;
 using WebApplaud.Databases.KeyValue;
 using WebApplaud.Models;
@@ -9,7 +10,7 @@ namespace WebApplaud.InnerApis
 	public static class UserProfile
 	{
 
-		internal static readonly Dictionary<string, UserSessionModel> m_sessions = [];
+		internal static readonly ConcurrentDictionary<string, UserSessionModel> m_sessions = [];
 
 		internal static readonly List<UserProfileModel> m_profiles = [];
 
@@ -62,11 +63,7 @@ namespace WebApplaud.InnerApis
 					if (profile is null) return Results.BadRequest();
 
 					var token = Guid.NewGuid().ToString();
-
-					CreateProfileCookie(httpContext, token);
-
 					var drawerApp = AppApis.GetDrawerApp();
-
 					var session = new UserSessionModel
 					{
 						App = drawerApp.LocalId,
@@ -74,6 +71,9 @@ namespace WebApplaud.InnerApis
 						Id = profile.Id,
 						Token = token
 					};
+					if (!m_sessions.TryAdd(token, session)) return Results.BadRequest();
+
+					CreateProfileCookie(httpContext, token);
 
 					return Results.Redirect($"/{drawerApp.LocalId}/{drawerApp.StartupPage}");
 				}
