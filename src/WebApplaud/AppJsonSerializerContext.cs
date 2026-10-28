@@ -8,6 +8,7 @@ namespace WebApplaud
 	[JsonSerializable(typeof(AppManifestModel))]
 	[JsonSerializable(typeof(List<AppDrawerModel>))]
 	[JsonSerializable(typeof(UserProfileModel))]
+	[JsonSerializable(typeof(UserSessionModel))]
 	[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 	internal partial class AppJsonSerializerContext : JsonSerializerContext
 	{

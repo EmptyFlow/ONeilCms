@@ -33,7 +33,7 @@ namespace WebApplaud.Databases.KeyValue
 			m_loadedPath = path;
 		}
 
-		public async Task SaveData()
+		public async Task SaveDatabase()
 		{
 			await File.WriteAllLinesAsync(m_loadedPath, m_keys.Values.Select(a => a.ToString()).ToArray());
 		}
@@ -96,6 +96,14 @@ namespace WebApplaud.Databases.KeyValue
 			}
 
 			m_keys[name] = new KeyValueItem(name, $"{value}");
+		}
+
+		internal void Remove(string name)
+		{
+			if (!m_keys.ContainsKey(name)) return;
+
+			var failed = m_keys.TryRemove(name, out _);
+			if (failed && m_keys.ContainsKey(name)) throw new Exception($"Failed to remove {name} from key-value database!");
 		}
 
 	}

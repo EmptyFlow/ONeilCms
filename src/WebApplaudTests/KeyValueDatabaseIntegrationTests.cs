@@ -206,7 +206,7 @@ doublevalue 4546.0908
 			database.SetDouble("doublevalue", 489.02);
 			database.SetString("test1", "blablablab");
 			database.SetInteger("digitvalue", 123456);
-			await database.SaveData();
+			await database.SaveDatabase();
 
 			await database.LoadDatabase(path);
 			var stringValue = database.GetString("test1");
