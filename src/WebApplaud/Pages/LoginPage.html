@@ -2,7 +2,8 @@
 <html>
 <head>
 	<meta charset="utf-8" />
-	<title>Log in to your WebApplaud account</title>
+	<title>Sign in to your account</title>
+	<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 	<style>
 		@font-face {
 			font-family: "Roboto";
@@ -24,6 +25,7 @@
 			flex-direction: row;
 			align-items: center;
 			justify-content: center;
+			background-color: #ADF5FF;
 		}
 
 		.form-container {
@@ -31,8 +33,9 @@
 			display: flex;
 			flex-direction: column;
 			padding: 10px;
-			border: 1px solid rgb(233.66, 233.66, 233.66);
+			border: 1px solid #0075A2;
 			border-radius: 4px;
+			background-color: white;
 		}
 
 		.form-header {
@@ -65,6 +68,12 @@
 <body>
 	<div class="all-page-container">
 		<div id="form" class="form-container">
+			<div style="display: flex; flex-direction: row; align-items: center;">
+				<div style="width: 80px; height: 80px; display: flex; flex-direction: row; align-items: center; justify-content: center; margin-left: 8px; ">
+					<img src="/favicon.svg" width="50" height="50" />
+				</div>
+				<span style="font-size: 26px; margin-left: 10px; color: #0075A2; ">WebApplaud</span>
+			</div>
 			<div class="form-header"><span>Sign in to your account</span></div>
 			<span class="form-label">User Name</span>
 			<input id="username" class="form-input" type="text" value="" placeholder="Enter username" />

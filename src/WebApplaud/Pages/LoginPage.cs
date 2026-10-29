@@ -26,10 +26,13 @@ namespace WebApplaud.Pages
 
 		private static byte[] m_robotoTemplate = [];
 
+		private static byte[] m_icon = [];
+
 		public static void Initialize()
 		{
 			m_drawerTemplate = GetEmbeddedResources("LoginPage.html");
 			m_robotoTemplate = GetEmbeddedResources("Roboto.ttf");
+			m_icon = GetEmbeddedResources("webapplaud.svg");
 		}
 
 		public static void RegisterRoutes(WebApplication app, bool maskRoutes = false)
@@ -41,6 +44,10 @@ namespace WebApplaud.Pages
 			app.MapGet($"/Roboto.ttf", (HttpContext httpContext) =>
 			{
 				return Results.Bytes(m_robotoTemplate, "text/html");
+			});
+			app.MapGet($"/favicon.svg", (HttpContext httpContext) =>
+			{
+				return Results.Bytes(m_icon, "image/svg+xml");
 			});
 		}
 

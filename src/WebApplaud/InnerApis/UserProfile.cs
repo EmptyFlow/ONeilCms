@@ -148,6 +148,7 @@ namespace WebApplaud.InnerApis
 
 		internal static async Task CreateUserProfile(UserProfileModel userProfile)
 		{
+			userProfile.Id = Guid.NewGuid().ToString().Replace("-", "");
 			if (m_profiles.Any(a => a.Id == userProfile.Id)) throw new Exception($"User with id {userProfile.Id} already created!");
 			if (m_profiles.Any(a => a.Login == userProfile.Login)) throw new Exception($"User with login {userProfile.Login} already created!");
 
