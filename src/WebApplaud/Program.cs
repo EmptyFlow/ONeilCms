@@ -1,3 +1,4 @@
+using FlowCommandLine;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -12,6 +13,11 @@ using WebApplaud.Pages;
 
 Version? version = Assembly.GetEntryAssembly()?.GetName().Version;
 string? fileVersion = version is not null ? $"{version.Major}.{version.Minor}.{version.Build}" : "";
+
+// if required we handle commands from Command line interface
+if (await ConsoleCommandsHandler.Handle(fileVersion)) return;
+
+// if not we run web server
 Console.WriteLine("WebApplaud version " + fileVersion);
 Console.WriteLine("(c) 2026 Roman Vladimirov. All rights reserved.\n");
 

@@ -153,7 +153,8 @@ namespace WebApplaud.InnerApis
 			if (m_profiles.Any(a => a.Login == userProfile.Login)) throw new Exception($"User with login {userProfile.Login} already created!");
 
 			if (userProfile.FirstName.Length > 60) userProfile = userProfile with { FirstName = userProfile.FirstName.Substring(0, 60) };
-			if (userProfile.LastName.Length > 100) userProfile = userProfile with { FirstName = userProfile.FirstName.Substring(0, 100) };
+			if (userProfile.LastName.Length > 100) userProfile = userProfile with { LastName = userProfile.LastName.Substring(0, 100) };
+			userProfile = userProfile with { Password = HashPassword.Hash(userProfile.Password) };
 
 			m_profilesDatabase.SetString(userProfile.Id, JsonSerializer.Serialize(userProfile, AppJsonSerializerContext.Default.UserProfileModel));
 			await m_profilesDatabase.SaveDatabase();
