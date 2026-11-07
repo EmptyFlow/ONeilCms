@@ -1,4 +1,3 @@
-using FlowCommandLine;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -61,12 +60,8 @@ builder.Services.AddRateLimiter(options =>
 
 builder.Services.AddMemoryCache();
 builder.Services.AddResponseCaching();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
 
 var app = builder.Build();
-
-if (app.Environment.IsDevelopment()) app.MapOpenApi();
 
 if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection();
 

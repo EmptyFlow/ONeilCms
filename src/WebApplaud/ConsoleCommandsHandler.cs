@@ -83,7 +83,7 @@ namespace WebApplaud
 						]
 					)
 					.RunCommandAsync();
-				return result.CommandHandled;
+				return result.CommandHandled || result.Failed;
 			}
 
 			return false;

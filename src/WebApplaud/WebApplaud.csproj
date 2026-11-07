@@ -23,10 +23,6 @@
 		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-	</PropertyGroup>
-
 	<ItemGroup>
 		<EmbeddedResource Include="Pages\LoginPage.html" />
 		<EmbeddedResource Include="Pages\Roboto.ttf" />
@@ -34,8 +30,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="FlowCommandLine" Version="1.0.12" />
-		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.14" />
+		<PackageReference Include="FlowCommandLine" Version="1.0.15" />
 	</ItemGroup>
 
 	<ItemGroup>
