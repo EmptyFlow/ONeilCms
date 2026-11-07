@@ -80,10 +80,12 @@ namespace WebApplaud.InnerApis
 					var password = form.ContainsKey("password") && form["password"].Any() ? form["password"].First() : "";
 					if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(password)) return Results.BadRequest();
 
-					password = HashPassword.Hash(password); // hash password
+					
 
-					var profile = m_profiles.FirstOrDefault(a => a.Login == login && a.Password == password);
+					var profile = m_profiles.FirstOrDefault(a => a.Login == login);
 					if (profile is null) return Results.BadRequest();
+
+					if (!HashPassword.Verify(profile.Password, password)) return Results.BadRequest();
 
 					var token = Guid.NewGuid().ToString();
 					var drawerApp = AppApis.GetDrawerApp();

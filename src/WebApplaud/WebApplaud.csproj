@@ -33,8 +33,4 @@
 		<PackageReference Include="FlowCommandLine" Version="1.0.15" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\OnielCms.Core\OnielCms.Core.csproj" />
-	</ItemGroup>
-
 </Project>

@@ -107,6 +107,13 @@
 				method: "POST",
 				body: formData
 			});
+
+			if (response.redirected && response.status === 200) {
+				location.href = response.url;
+				return;
+			} else {
+				//TODO: show error!
+			}
 		}
 
 		init();

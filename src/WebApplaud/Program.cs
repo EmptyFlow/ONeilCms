@@ -13,6 +13,8 @@ using WebApplaud.Pages;
 Version? version = Assembly.GetEntryAssembly()?.GetName().Version;
 string? fileVersion = version is not null ? $"{version.Major}.{version.Minor}.{version.Build}" : "";
 
+GlobalConfig.SetupPath("C:/work/Repositories/AppsFolder");
+
 // if required we handle commands from Command line interface
 if (await ConsoleCommandsHandler.Handle(fileVersion)) return;
 
@@ -20,7 +22,6 @@ if (await ConsoleCommandsHandler.Handle(fileVersion)) return;
 Console.WriteLine("WebApplaud version " + fileVersion);
 Console.WriteLine("(c) 2026 Roman Vladimirov. All rights reserved.\n");
 
-GlobalConfig.SetupPath("C:/work/Repositories/AppsFolder");
 if (FolderInitiator.FoldersNotExists(GlobalConfig.Path))
 {
 	try

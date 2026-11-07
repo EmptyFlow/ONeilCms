@@ -31,7 +31,8 @@ namespace WebApplaud
 								LastName = parameters.LastName,
 								Login = parameters.Login,
 								Password = parameters.Password,
-								Role = parameters.Role,
+								Role = parameters.Role ?? "",
+								Permissions = ""
 							};
 							await UserProfile.Initialize(onlyProfiles: true);
 							try
