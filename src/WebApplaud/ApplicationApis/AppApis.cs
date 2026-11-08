@@ -108,25 +108,22 @@ namespace WebApplaud.ApplicationApis
 
 				var apps = m_apps
 					.Where(a => a.Id != m_defaultAppId)
-					.Select(a => new AppDrawerModel { Title = a.Titles.FirstOrDefault().Value ?? "", Identifier = a.Id })
+					.Select(a => new AppDrawerModel { Title = a.Titles.FirstOrDefault().Value ?? "", Identifier = a.Id, Icon = a.Icon })
 					.ToList();
 				return Results.Json(apps, AppJsonSerializerContext.Default);
 			});
 
-			app.MapPost(AddRoute("openApp", maskRoutes), (HttpContext httpContext, [FromQuery] string app) =>
+			app.MapPost(AddRoute("openApp", maskRoutes), (HttpContext httpContext, [FromBody] string app) =>
 			{
 				var session = UserProfile.GetProfileFromSession(httpContext);
 				if (session is null) return Results.Unauthorized();
 
-				var application = m_apps.FirstOrDefault(a => a.Id == app);
-				if (application is null) return Results.NotFound();
+				var needOpenApp = m_apps.FirstOrDefault(a => a.Id == app);
+				if (needOpenApp is null) return Results.NotFound();
 
-				var applicationModel = m_apps.FirstOrDefault(a => a.LocalId == session.App);
-				if (applicationModel is null) return Results.NotFound();
+				session.App = needOpenApp.LocalId;
 
-				session.App = application.LocalId;
-
-				return Results.Content($"/{applicationModel.LocalId}/{applicationModel.StartupPage}", contentType: "text/plain");
+				return Results.Content($"/{needOpenApp.LocalId}/{needOpenApp.StartupPage}", contentType: "text/plain");
 			});
 			app.MapPost(AddRoute("opendrawer", maskRoutes), (HttpContext httpContext) => {
 				var session = UserProfile.GetProfileFromSession(httpContext);

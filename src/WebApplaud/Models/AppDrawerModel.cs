@@ -8,6 +8,8 @@
 
 		public required string Identifier { get; set; } = "";
 
+		public string Icon { get; set; } = "";
+
 	}
 
 }
