@@ -107,6 +107,7 @@ namespace WebApplaud.ApplicationApis
 				if (session is null) return Results.Unauthorized();
 
 				var apps = m_apps
+					.Where(a => a.Id != m_defaultAppId)
 					.Select(a => new AppDrawerModel { Title = a.Titles.FirstOrDefault().Value ?? "", Identifier = a.Id })
 					.ToList();
 				return Results.Json(apps, AppJsonSerializerContext.Default);
@@ -126,6 +127,30 @@ namespace WebApplaud.ApplicationApis
 				session.App = application.LocalId;
 
 				return Results.Content($"/{applicationModel.LocalId}/{applicationModel.StartupPage}", contentType: "text/plain");
+			});
+			app.MapPost(AddRoute("opendrawer", maskRoutes), (HttpContext httpContext) => {
+				var session = UserProfile.GetProfileFromSession(httpContext);
+				if (session is null) return Results.Unauthorized();
+
+				var defaultApp = m_apps.FirstOrDefault(a => a.Id == m_defaultAppId);
+				if (defaultApp is null) return Results.BadRequest();
+
+				session.App = m_defaultAppId;
+
+				return Results.Content($"/{defaultApp.LocalId}/{defaultApp.StartupPage}", contentType: "text/plain");
+			});
+			app.MapPost(AddRoute("closeapp", maskRoutes), (HttpContext httpContext, [FromQuery] string app) => {
+				var session = UserProfile.GetProfileFromSession(httpContext);
+				if (session is null) return Results.Unauthorized();
+
+				//TODO: remove app resources
+
+				var defaultApp = m_apps.FirstOrDefault(a => a.Id == m_defaultAppId);
+				if (defaultApp is null) return Results.BadRequest();
+
+				session.App = m_defaultAppId;
+
+				return Results.Content($"/{defaultApp.LocalId}/{defaultApp.StartupPage}", contentType: "text/plain");
 			});
 		}
 
