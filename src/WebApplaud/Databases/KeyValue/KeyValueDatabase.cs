@@ -1,27 +1,32 @@
 ﻿using System.Collections.Concurrent;
 
-namespace WebApplaud.Databases.KeyValue
-{
+namespace WebApplaud.Databases.KeyValue {
 
-	internal class KeyValueDatabase
-	{
+	internal interface IKeyValueDatabase {
+
+		Task LoadDatabase(string path);
+
+		Task SaveDatabase();
+
+		string GetString(string name);
+
+	}
+
+	internal class KeyValueDatabase : IKeyValueDatabase {
 
 		private string m_loadedPath = "";
 
 		private readonly ConcurrentDictionary<string, KeyValueItem> m_keys = [];
 
-		public KeyValueDatabase()
-		{
+		public KeyValueDatabase() {
 		}
 
-		public async Task LoadDatabase(string path)
-		{
+		public async Task LoadDatabase(string path) {
 			if (m_keys.Any()) m_keys.Clear();
 
 			if (!File.Exists(path)) await File.WriteAllTextAsync(path, "");
 
-			await foreach (var line in File.ReadLinesAsync(path))
-			{
+			await foreach (var line in File.ReadLinesAsync(path)) {
 				var firstSpaceIndex = line.IndexOf(' ');
 				if (firstSpaceIndex == -1) continue;
 
@@ -33,8 +38,7 @@ namespace WebApplaud.Databases.KeyValue
 			m_loadedPath = path;
 		}
 
-		public async Task SaveDatabase()
-		{
+		public async Task SaveDatabase() {
 			await File.WriteAllLinesAsync(m_loadedPath, m_keys.Values.Select(a => a.ToString()).ToArray());
 		}
 
@@ -44,31 +48,26 @@ namespace WebApplaud.Databases.KeyValue
 
 		internal IEnumerable<string> GetKeys() => m_keys.Keys;
 
-		internal string GetString(string name)
-		{
+		public string GetString(string name) {
 			if (!m_keys.TryGetValue(name, out KeyValueItem? value)) return "";
 
 			return value.AsString();
 		}
 
-		internal int GetInteger(string name)
-		{
+		internal int GetInteger(string name) {
 			if (!m_keys.TryGetValue(name, out KeyValueItem? value)) return 0;
 
 			return value.AsInteger();
 		}
 
-		internal double GetDouble(string name)
-		{
+		internal double GetDouble(string name) {
 			if (!m_keys.TryGetValue(name, out KeyValueItem? value)) return 0.0;
 
 			return value.AsDouble();
 		}
 
-		internal void SetString(string name, string value)
-		{
-			if (!m_keys.ContainsKey(name))
-			{
+		internal void SetString(string name, string value) {
+			if (!m_keys.ContainsKey(name)) {
 				m_keys.TryAdd(name, new KeyValueItem(name, $"\"{value}\""));
 				return;
 			}
@@ -76,10 +75,8 @@ namespace WebApplaud.Databases.KeyValue
 			m_keys[name] = new KeyValueItem(name, $"\"{value}\"");
 		}
 
-		internal void SetInteger(string name, int value)
-		{
-			if (!m_keys.ContainsKey(name))
-			{
+		internal void SetInteger(string name, int value) {
+			if (!m_keys.ContainsKey(name)) {
 				m_keys.TryAdd(name, new KeyValueItem(name, $"{value}"));
 				return;
 			}
@@ -87,10 +84,8 @@ namespace WebApplaud.Databases.KeyValue
 			m_keys[name] = new KeyValueItem(name, $"{value}");
 		}
 
-		internal void SetDouble(string name, double value)
-		{
-			if (!m_keys.ContainsKey(name))
-			{
+		internal void SetDouble(string name, double value) {
+			if (!m_keys.ContainsKey(name)) {
 				m_keys.TryAdd(name, new KeyValueItem(name, $"{value}"));
 				return;
 			}
@@ -98,8 +93,7 @@ namespace WebApplaud.Databases.KeyValue
 			m_keys[name] = new KeyValueItem(name, $"{value}");
 		}
 
-		internal void Remove(string name)
-		{
+		internal void Remove(string name) {
 			if (!m_keys.ContainsKey(name)) return;
 
 			var failed = m_keys.TryRemove(name, out _);

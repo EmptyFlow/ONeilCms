@@ -1,13 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using WebApplaud.Databases.KeyValue;
+using WebApplaud.FileSystems;
 using WebApplaud.InnerApis;
 using WebApplaud.Models;
 
-namespace WebApplaud.ApplicationApis
-{
-	internal static class AppApis
-	{
+namespace WebApplaud.ApplicationApis {
+	internal static class AppApis {
 
 		internal static List<AppModel> m_apps = [];
 
@@ -19,14 +18,12 @@ namespace WebApplaud.ApplicationApis
 
 		internal static string m_defaultAppId = "";
 
-		internal static async Task Initialize(WebApplication app)
-		{
+		internal static async Task Initialize(WebApplication app) {
 			m_appFolder = Path.Combine(GlobalConfig.Path, "apps");
 			var appDirectory = new DirectoryInfo(m_appFolder);
 			var applicationFolders = appDirectory.GetDirectories();
 
-			foreach (var application in applicationFolders)
-			{
+			foreach (var application in applicationFolders) {
 				var appName = application.Name;
 
 				var manifestPath = Path.Combine(m_appFolder, appName, "webapp.json");
@@ -36,8 +33,7 @@ namespace WebApplaud.ApplicationApis
 				var manifestModel = JsonSerializer.Deserialize(manifestJson, AppJsonSerializerContext.Default.AppManifestModel);
 				if (manifestModel is null) continue;
 
-				var appmodel = new AppModel
-				{
+				var appmodel = new AppModel {
 					Id = manifestModel.Id,
 					LocalId = Guid.NewGuid().ToString().Replace("-", ""),
 					Titles = manifestModel.Titles.ToDictionary(a => a.Key, a => a.Value),
@@ -52,13 +48,11 @@ namespace WebApplaud.ApplicationApis
 
 				var basePath = $"{appmodel.LocalId}/";
 
-				foreach (var file in application.EnumerateFiles("*", SearchOption.AllDirectories))
-				{
+				foreach (var file in application.EnumerateFiles("*", SearchOption.AllDirectories)) {
 					var directory = file.DirectoryName ?? "";
 					var appLocalId = appmodel.LocalId;
 					var localFolder = directory.Replace(application.FullName, "").Replace("\\", "/");
-					if (localFolder.Length > 0)
-					{
+					if (localFolder.Length > 0) {
 						if (localFolder.First() == '/') localFolder = localFolder.Substring(1);
 						if (localFolder.Last() != '/') localFolder = localFolder + '/';
 					}
@@ -67,8 +61,7 @@ namespace WebApplaud.ApplicationApis
 					var downloadName = !isHtml ? file.Name : null;
 					var lastModified = file.LastWriteTimeUtc;
 					var fullName = file.FullName;
-					app.MapGet($"{basePath}{localFolder}{file.Name}", (HttpContext httpContext) =>
-					{
+					app.MapGet($"{basePath}{localFolder}{file.Name}", (HttpContext httpContext) => {
 						var session = UserProfile.GetProfileFromSession(httpContext);
 						if (session is null) return Results.Unauthorized();
 						if (session.App != appLocalId) return Results.Unauthorized(); // check if open appropriate application
@@ -82,27 +75,22 @@ namespace WebApplaud.ApplicationApis
 			var settingsFolder = Path.Combine(GlobalConfig.Path, "settings", "apps.kvdb");
 			await m_appsSettings.LoadDatabase(settingsFolder);
 			var defautlApp = m_appsSettings.GetString("defaultapp");
-			if (string.IsNullOrEmpty(defautlApp) || !m_apps.Any(a => a.Id == defautlApp))
-			{
+			if (string.IsNullOrEmpty(defautlApp) || !m_apps.Any(a => a.Id == defautlApp)) {
 				m_defaultAppId = m_apps.First().Id;
 			}
-			else
-			{
+			else {
 				m_defaultAppId = defautlApp;
 			}
 		}
 
-		internal static string AddRoute(string route, bool maskRoutes = false)
-		{
+		internal static string AddRoute(string route, bool maskRoutes = false) {
 			var registerRoute = maskRoutes ? Guid.NewGuid().ToString().Replace("-", "") : route;
 			m_routes.Add(registerRoute, route);
 			return registerRoute;
 		}
 
-		internal static void RegisterRoutes(WebApplication app, bool maskRoutes = false)
-		{
-			app.MapGet(AddRoute("apps", maskRoutes), (HttpContext httpContext) =>
-			{
+		internal static void RegisterRoutes(WebApplication app, bool maskRoutes = false) {
+			app.MapGet(AddRoute("apps", maskRoutes), (HttpContext httpContext) => {
 				var session = UserProfile.GetProfileFromSession(httpContext);
 				if (session is null) return Results.Unauthorized();
 
@@ -113,8 +101,7 @@ namespace WebApplaud.ApplicationApis
 				return Results.Json(apps, AppJsonSerializerContext.Default);
 			});
 
-			app.MapPost(AddRoute("openApp", maskRoutes), (HttpContext httpContext, [FromBody] string app) =>
-			{
+			app.MapPost(AddRoute("openApp", maskRoutes), (HttpContext httpContext, [FromBody] string app) => {
 				var session = UserProfile.GetProfileFromSession(httpContext);
 				if (session is null) return Results.Unauthorized();
 
@@ -151,16 +138,14 @@ namespace WebApplaud.ApplicationApis
 			});
 		}
 
-		internal static string GetAppLocalId(string appIdentifier)
-		{
+		internal static string GetAppLocalId(string appIdentifier) {
 			var app = m_apps.FirstOrDefault(a => a.Id == appIdentifier);
 			if (app is null) return "";
 
 			return app.LocalId;
 		}
 
-		internal static string GetAppId(string appLocalId)
-		{
+		internal static string GetAppId(string appLocalId) {
 			var app = m_apps.FirstOrDefault(a => a.LocalId == appLocalId);
 			if (app is null) return "";
 
@@ -168,6 +153,94 @@ namespace WebApplaud.ApplicationApis
 		}
 
 		internal static AppModel GetDrawerApp() => m_apps.First(a => a.Id == m_defaultAppId);
+
+	}
+
+
+	internal sealed class AppApisInternal {
+
+		internal readonly IInternalFileSystem m_internalFileSystem;
+
+		internal static string m_appFolder = "";
+
+		internal static List<AppModel> m_apps = [];
+
+		internal readonly IKeyValueDatabase m_appsSettings;
+
+		internal static string m_defaultAppId = "";
+
+		internal AppApisInternal(IInternalFileSystem internalFileSystem, IKeyValueDatabase keyValueDatabase) {
+			m_internalFileSystem = internalFileSystem ?? throw new ArgumentNullException(nameof(internalFileSystem));
+			m_appsSettings = keyValueDatabase ?? throw new ArgumentNullException(nameof(keyValueDatabase));
+		}
+
+		internal async Task Initialize(string globalPath, IEndpointRouteBuilder app) {
+			m_appFolder = Path.Combine(globalPath, "apps");
+			var applicationFolders = m_internalFileSystem.GetDirectories(m_appFolder);
+
+			foreach (var application in applicationFolders) {
+				var appName = application.Name;
+
+				var manifestPath = Path.Combine(m_appFolder, appName, "webapp.json");
+				if (!File.Exists(manifestPath)) continue;
+
+				var manifestJson = File.ReadAllText(manifestPath);
+				var manifestModel = JsonSerializer.Deserialize(manifestJson, AppJsonSerializerContext.Default.AppManifestModel);
+				if (manifestModel is null) continue;
+
+				var appmodel = new AppModel {
+					Id = manifestModel.Id,
+					LocalId = Guid.NewGuid().ToString().Replace("-", ""),
+					Titles = manifestModel.Titles.ToDictionary(a => a.Key, a => a.Value),
+					Developers = manifestModel.Developers.ToArray(),
+					Factors = manifestModel.Factors.ToArray(),
+					DownloadUrl = manifestModel.DownloadUrl,
+					ManifestUrl = manifestModel.ManifestUrl,
+					StartupPage = manifestModel.StartupPage,
+					Icon = manifestModel.Icon,
+				};
+				m_apps.Add(appmodel);
+
+				var basePath = $"{appmodel.LocalId}/";
+
+				foreach (var file in application.EnumerateFiles()) {
+					var directory = file.DirectoryName ?? "";
+					var appLocalId = appmodel.LocalId;
+					var localFolder = directory.Replace(application.FullName, "").Replace("\\", "/");
+					if (localFolder.Length > 0) {
+						if (localFolder.First() == '/') localFolder = localFolder.Substring(1);
+						if (localFolder.Last() != '/') localFolder = localFolder + '/';
+					}
+					var mimeType = FolderInitiator.GetMimeTypeForFileExtension(file.Extension);
+					var isHtml = mimeType.ToLowerInvariant() == "text/html";
+					var downloadName = !isHtml ? file.Name : null;
+					var lastModified = file.LastWriteTimeUtc;
+					var fullName = file.FullName;
+					app.MapGet($"{basePath}{localFolder}{file.Name}", (HttpContext httpContext) => {
+						var session = UserProfile.GetProfileFromSession(httpContext);
+						if (session is null) return Results.Unauthorized();
+						if (session.App != appLocalId) return Results.Unauthorized(); // check if open appropriate application
+
+						var stream = File.OpenRead(fullName);
+						return Results.File(stream, contentType: mimeType, fileDownloadName: downloadName, enableRangeProcessing: true, lastModified: lastModified);
+					});
+				}
+			}
+
+			await LoadDatabase();
+		}
+
+		internal async Task LoadDatabase() {
+			var settingsFolder = Path.Combine(GlobalConfig.Path, "settings", "apps.kvdb");
+			await m_appsSettings.LoadDatabase(settingsFolder);
+			var defautlApp = m_appsSettings.GetString("defaultapp");
+			if (string.IsNullOrEmpty(defautlApp) || !m_apps.Any(a => a.Id == defautlApp)) {
+				m_defaultAppId = m_apps.First().Id;
+			}
+			else {
+				m_defaultAppId = defautlApp;
+			}
+		}
 
 	}
 
