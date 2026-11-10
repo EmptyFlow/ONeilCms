@@ -136,7 +136,7 @@ namespace WebApplaud.ApplicationApis
 
 				return Results.Content($"/{defaultApp.LocalId}/{defaultApp.StartupPage}", contentType: "text/plain");
 			});
-			app.MapPost(AddRoute("closeapp", maskRoutes), (HttpContext httpContext, [FromQuery] string app) => {
+			app.MapPost(AddRoute("closeapp", maskRoutes), (HttpContext httpContext) => {
 				var session = UserProfile.GetProfileFromSession(httpContext);
 				if (session is null) return Results.Unauthorized();
 
