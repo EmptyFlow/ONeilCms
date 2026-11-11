@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.RateLimiting;
 using WebApplaud;
 using WebApplaud.ApplicationApis;
+using WebApplaud.FileSystems;
 using WebApplaud.InnerApis;
 using WebApplaud.Models;
 using WebApplaud.Pages;
@@ -77,7 +78,9 @@ var folderRoots = new Dictionary<string, FolderRootModel>();
 
 IndexingUserFolders(folderRoots);
 
-await AppApis.Initialize(app);
+var internalFileSystem = new InternalFileSystem();
+
+await AppApis.Initialize(internalFileSystem, app);
 await UserProfile.Initialize();
 LoginPage.Initialize();
 

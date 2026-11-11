@@ -17,6 +17,7 @@
 				.Select(
 					a => new FileModel {
 						Name = a.Name,
+						Extension = a.Extension,
 						DirectoryName = a.DirectoryName ?? "",
 						FullName = a.FullName,
 						LastWriteTimeUtc = a.LastWriteTimeUtc

@@ -4,11 +4,9 @@ using WebApplaud.ApplicationApis;
 using WebApplaud.Databases.KeyValue;
 using WebApplaud.Models;
 
-namespace WebApplaud.InnerApis
-{
+namespace WebApplaud.InnerApis {
 
-	public static class UserProfile
-	{
+	public static class UserProfile {
 
 		internal static readonly ConcurrentDictionary<string, UserSessionModel> m_sessions = [];
 
@@ -20,15 +18,13 @@ namespace WebApplaud.InnerApis
 
 		internal static KeyValueDatabase m_sessionDatabase = new KeyValueDatabase();
 
-		async internal static Task Initialize(bool onlyProfiles = false)
-		{
+		async internal static Task Initialize(bool onlyProfiles = false) {
 			var profilesFile = Path.Combine(GlobalConfig.Path, "settings", "profiles.kvdb");
 			await m_profilesDatabase.LoadDatabase(profilesFile);
 
 			var keys = m_profilesDatabase.GetKeys();
 
-			foreach (var key in keys)
-			{
+			foreach (var key in keys) {
 				var model = m_profilesDatabase.GetString(key);
 				UserProfileModel? userProfile = JsonSerializer.Deserialize(model, AppJsonSerializerContext.Default.UserProfileModel);
 				if (userProfile is null) continue;
@@ -44,13 +40,11 @@ namespace WebApplaud.InnerApis
 			var tokens = m_sessionDatabase.GetKeys();
 
 			var changed = false;
-			foreach (var token in tokens)
-			{
+			foreach (var token in tokens) {
 				var model = m_sessionDatabase.GetString(token);
 				UserSessionModel? userSession = JsonSerializer.Deserialize(model, AppJsonSerializerContext.Default.UserSessionModel);
 				if (userSession is null) continue;
-				if (userSession.Expire < DateTime.UtcNow)
-				{
+				if (userSession.Expire < DateTime.UtcNow) {
 					m_sessionDatabase.Remove(token);
 					changed = true;
 					continue;
@@ -63,24 +57,21 @@ namespace WebApplaud.InnerApis
 			if (changed) await m_sessionDatabase.SaveDatabase();
 		}
 
-		internal static string AddRoute(string route, bool maskRoutes = false)
-		{
+		internal static string AddRoute(string route, bool maskRoutes = false) {
 			var registerRoute = maskRoutes ? Guid.NewGuid().ToString().Replace("-", "") : route;
 			m_routes.Add(registerRoute, route);
 			return registerRoute;
 		}
 
-		internal static void RegisterRoutes(WebApplication app, bool maskRoutes = false)
-		{
+		internal static void RegisterRoutes(WebApplication app, bool maskRoutes = false) {
 			app.MapPost(
-				AddRoute("login", maskRoutes), async (HttpContext httpContext) =>
-				{
+				AddRoute("login", maskRoutes), async (HttpContext httpContext) => {
 					var form = httpContext.Request.Form;
 					var login = form.ContainsKey("login") && form["login"].Any() ? form["login"].First() : "";
 					var password = form.ContainsKey("password") && form["password"].Any() ? form["password"].First() : "";
 					if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(password)) return Results.BadRequest();
 
-					
+
 
 					var profile = m_profiles.FirstOrDefault(a => a.Login == login);
 					if (profile is null) return Results.BadRequest();
@@ -89,8 +80,9 @@ namespace WebApplaud.InnerApis
 
 					var token = Guid.NewGuid().ToString();
 					var drawerApp = AppApis.GetDrawerApp();
-					var session = new UserSessionModel
-					{
+					if (drawerApp is null) return Results.InternalServerError();
+
+					var session = new UserSessionModel {
 						App = drawerApp.LocalId,
 						Expire = DateTime.UtcNow.AddDays(7),
 						Id = profile.Id,
@@ -98,13 +90,11 @@ namespace WebApplaud.InnerApis
 					};
 					if (!m_sessions.TryAdd(token, session)) return Results.BadRequest();
 
-					try
-					{
+					try {
 						m_sessionDatabase.SetString(token, JsonSerializer.Serialize(session, AppJsonSerializerContext.Default.UserSessionModel));
 						await m_sessionDatabase.SaveDatabase();
 					}
-					catch
-					{
+					catch {
 						//if we can't save session to database we remove token from memory
 						m_sessions.Remove(token, out _);
 					}
@@ -117,10 +107,8 @@ namespace WebApplaud.InnerApis
 			.RequireRateLimiting("login");
 		}
 
-		internal static void CreateProfileCookie(HttpContext httpContext, string token)
-		{
-			var cookieOptions = new CookieOptions()
-			{
+		internal static void CreateProfileCookie(HttpContext httpContext, string token) {
+			var cookieOptions = new CookieOptions() {
 				IsEssential = true,
 				Path = "/",
 				//Domain = "localhost",
@@ -132,13 +120,11 @@ namespace WebApplaud.InnerApis
 			httpContext.Response.Cookies.Append("waut", token, cookieOptions);
 		}
 
-		internal static UserSessionModel? GetProfileFromSession(HttpContext httpContext)
-		{
+		internal static UserSessionModel? GetProfileFromSession(HttpContext httpContext) {
 			var cookieValue = httpContext.Request.Cookies.FirstOrDefault(a => a.Key == "waut").Value ?? null;
 			if (cookieValue is null || string.IsNullOrEmpty(cookieValue)) return null;
 
-			if (m_sessions.ContainsKey(cookieValue))
-			{
+			if (m_sessions.ContainsKey(cookieValue)) {
 				var session = m_sessions[cookieValue];
 				if (DateTime.UtcNow >= session.Expire) return null;
 
@@ -148,8 +134,7 @@ namespace WebApplaud.InnerApis
 			return null;
 		}
 
-		internal static async Task CreateUserProfile(UserProfileModel userProfile)
-		{
+		internal static async Task CreateUserProfile(UserProfileModel userProfile) {
 			userProfile.Id = Guid.NewGuid().ToString().Replace("-", "");
 			if (m_profiles.Any(a => a.Id == userProfile.Id)) throw new Exception($"User with id {userProfile.Id} already created!");
 			if (m_profiles.Any(a => a.Login == userProfile.Login)) throw new Exception($"User with login {userProfile.Login} already created!");
