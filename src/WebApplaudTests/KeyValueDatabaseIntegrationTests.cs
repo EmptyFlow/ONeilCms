@@ -133,6 +133,31 @@ doublevalue 4546.0908
 		}
 
 		[Test]
+		public async Task LoadData_Completed_SetString_LineBreak_Tabulator_CaretBack() {
+			//arrange
+			var database = new KeyValueDatabase();
+			var path = "LoadData_Completed_SetString.kv";
+			if (File.Exists(path)) File.Delete(path);
+
+			await File.WriteAllTextAsync(
+				path,
+"""
+test1 "lalalala pruha bruha muhaha 😘"
+digitvalue 12343
+doublevalue 4546.0908
+"""
+			);
+
+			//act
+			await database.LoadDatabase(path);
+			database.SetString("test1", "Line one\nLine two\r\nLine with \tTab");
+			var newValue = database.GetString("test1");
+
+			//assert
+			Assert.Equals(newValue, "Line one\nLine two\r\nLine with \tTab");
+		}
+
+		[Test]
 		public async Task LoadData_Completed_SetInteger()
 		{
 			//arrange

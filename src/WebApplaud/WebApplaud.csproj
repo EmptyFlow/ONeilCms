@@ -33,4 +33,9 @@
 		<PackageReference Include="FlowCommandLine" Version="1.0.15" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+		<InternalsVisibleTo Include="WebApplaudTests" />
+	</ItemGroup>
+
 </Project>

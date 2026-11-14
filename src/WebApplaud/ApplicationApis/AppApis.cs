@@ -123,6 +123,9 @@ namespace WebApplaud.ApplicationApis {
 		public string DefaultAppId => m_defaultAppId;
 
 		internal async Task Initialize(string globalPath, IEndpointRouteBuilder app) {
+			if (globalPath is null) throw new ArgumentNullException(nameof(globalPath));
+			if (app is null) throw new ArgumentNullException(nameof(app));
+
 			m_appFolder = Path.Combine(globalPath, "apps");
 			var applicationFolders = m_internalFileSystem.GetDirectories(m_appFolder);
 
@@ -130,7 +133,7 @@ namespace WebApplaud.ApplicationApis {
 				var appName = application.Name;
 
 				var manifestPath = Path.Combine(m_appFolder, appName, "webapp.json");
-				if (!File.Exists(manifestPath)) continue;
+				if (!m_internalFileSystem.FileExists(manifestPath)) continue;
 
 				var manifestJson = File.ReadAllText(manifestPath);
 				var manifestModel = JsonSerializer.Deserialize(manifestJson, AppJsonSerializerContext.Default.AppManifestModel);
@@ -182,12 +185,11 @@ namespace WebApplaud.ApplicationApis {
 			var settingsFolder = Path.Combine(globalPath, "settings", "apps.kvdb");
 			await m_appsSettings.LoadDatabase(settingsFolder);
 			var defautlApp = m_appsSettings.GetString("defaultapp");
-			if (string.IsNullOrEmpty(defautlApp) || !m_apps.Any(a => a.Id == defautlApp)) {
+			if (m_apps.Any() && (string.IsNullOrEmpty(defautlApp) || !m_apps.Any(a => a.Id == defautlApp))) {
 				m_defaultAppId = m_apps.First().Id;
 			}
-			else {
-				m_defaultAppId = defautlApp;
-			}
+			
+			m_defaultAppId = defautlApp;
 		}
 
 	}

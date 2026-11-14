@@ -51,7 +51,7 @@ namespace WebApplaud.Databases.KeyValue {
 		public string GetString(string name) {
 			if (!m_keys.TryGetValue(name, out KeyValueItem? value)) return "";
 
-			return value.AsString();
+			return value.AsString().Replace("\\n", "\n").Replace("\\r", "\r").Replace("\\t", "\t");
 		}
 
 		internal int GetInteger(string name) {
@@ -67,12 +67,13 @@ namespace WebApplaud.Databases.KeyValue {
 		}
 
 		internal void SetString(string name, string value) {
+			var formattedValue = value.Replace("\n", "\\n").Replace("\r", "\\r").Replace("\t", "\\t");
 			if (!m_keys.ContainsKey(name)) {
-				m_keys.TryAdd(name, new KeyValueItem(name, $"\"{value}\""));
+				m_keys.TryAdd(name, new KeyValueItem(name, $"\"{formattedValue}\""));
 				return;
 			}
 
-			m_keys[name] = new KeyValueItem(name, $"\"{value}\"");
+			m_keys[name] = new KeyValueItem(name, $"\"{formattedValue}\"");
 		}
 
 		internal void SetInteger(string name, int value) {
