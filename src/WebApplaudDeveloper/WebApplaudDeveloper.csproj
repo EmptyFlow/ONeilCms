@@ -6,4 +6,8 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Version>0.0.1.0</Version>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="FlowCommandLine" Version="1.0.15" />
+	</ItemGroup>
 </Project>
